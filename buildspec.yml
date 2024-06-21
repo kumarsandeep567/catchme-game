@@ -1,0 +1,51 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: "us-east-2"
+    # The Frontend and Backend are connected through an Application Load Balancer 
+    # HTTP protocol (Frontend port: 80, Backend port: 5000)
+    REACT_APP_API_SERVICE_URL: "http://flask-react-alb-356355031.us-east-2.elb.amazonaws.com"
+    # The MongoDB is connected through a Network Load Balancer
+    # TCP protocol (MongoDB server port: 27017)
+    DATABASE_URL: "mongodb://flask-react-nlb-3da119cf9570067c.elb.us-east-2.amazonaws.com:27017/"
+
+phases: 
+  install: 
+    commands:
+      - echo "Installing Docker..."
+      - apt-get update
+      - apt-get install -y wget
+      # Download Docker Engine packages:
+      - wget --quiet -O "containerd.deb" "https://download.docker.com/linux/ubuntu/dists/jammy/pool/stable/amd64/containerd.io_1.6.33-1_amd64.deb"
+      - wget --quiet -O "docker_ce_cli.deb" "https://download.docker.com/linux/ubuntu/dists/jammy/pool/stable/amd64/docker-ce-cli_26.1.4-1~ubuntu.22.04~jammy_amd64.deb"
+      - wget --quiet -O "docker_ce.deb" "https://download.docker.com/linux/ubuntu/dists/jammy/pool/stable/amd64/docker-ce_26.1.4-1~ubuntu.22.04~jammy_amd64.deb"
+      - wget --quiet -O "docker_buildx_plugin.deb" "https://download.docker.com/linux/ubuntu/dists/jammy/pool/stable/amd64/docker-buildx-plugin_0.14.1-1~ubuntu.22.04~jammy_amd64.deb"
+      - wget --quiet -O "docker_compose_plugin.deb" "https://download.docker.com/linux/ubuntu/dists/jammy/pool/stable/amd64/docker-compose-plugin_2.27.1-1~ubuntu.22.04~jammy_amd64.deb"
+      # Install the downloaded packages
+      - dpkg -i "containerd.deb"
+      - dpkg -i "docker_ce_cli.deb"
+      - dpkg -i "docker_ce.deb"
+      - dpkg -i "docker_buildx_plugin.deb"
+      - dpkg -i "docker_compose_plugin.deb"
+      # Remove the installer packages
+      - rm -f "containerd.deb" "docker_ce.deb" "docker_ce_cli.deb" "docker_buildx_plugin.deb" "docker_compose_plugin.deb"
+      # Check if Docker is installed and running
+      - echo "Running docker 'hello-world' to check if installation was successful..."
+      - docker run hello-world
+  pre_build:
+    commands:
+      - echo "Attempting to login to AWS ECR..."
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+  build:
+    commands:
+      - echo "Building images [prod]..."
+      - docker build --no-cache -f ./db/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-db:prod --build-arg DATABASE_URL=$DATABASE_URL ./db
+      - docker build --no-cache -f ./be/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-be:prod ./be
+      - docker build --no-cache -f ./fe/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-fe:prod --build-arg NODE_ENV=production --build-arg REACT_APP_API_SERVICE_URL=$REACT_APP_API_SERVICE_URL ./fe
+  post_build:
+    commands:
+      - echo "Pushing [prod] images to AWS ECR..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-db:prod
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-be:prod
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-fe:prod
