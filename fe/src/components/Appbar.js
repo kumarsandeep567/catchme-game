@@ -141,7 +141,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 //~dk
-const isAuthorised = config.auth.isAuthenticated()
+// const isAuthorised = config.auth.isAuthenticated()
 
 export default function Dashboard() {
   const classes = useStyles();
