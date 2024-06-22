@@ -89,10 +89,11 @@ function GeoLocation(props) {
       <p>Longitude: {longitude}</p>
 
       {/* These are not used but defined above */}
-      {0 && Lat && <p>Latitude: {Lat}</p>}
-      {0 && Lon && <p>Longitude: {Lon}</p>}
-      {0 && Hea && <p>Heading: {Hea}</p>}
-      {0 && Spd && <p>Speed: {Spd}</p>}
+      {/* 'AND' these values for now to hide them */}
+      {null && Lat && <p>Latitude: {Lat}</p>}
+      {null && Lon && <p>Longitude: {Lon}</p>}
+      {null && Hea && <p>Heading: {Hea}</p>}
+      {null && Spd && <p>Speed: {Spd}</p>}
 
       {/* Render the map */}
       <h1>Map</h1>

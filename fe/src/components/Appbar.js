@@ -15,18 +15,19 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
-import Badge from '@material-ui/core/Badge';
 
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import LayersIcon from '@material-ui/icons/Layers';
+import MapIcon from '@material-ui/icons/Map';
+import CreateIcon from '@material-ui/icons/Create';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import ChatIcon from '@material-ui/icons/Chat';
 
+// import Badge from '@material-ui/core/Badge';
+// import NotificationsIcon from '@material-ui/icons/Notifications';
 // import config from '../config/config'
 
-// import your components:
+// Our custom components
 import Home from "../pages/Home";
 import SignUp from "../pages/SignUp/SignUp";
 import SignIn from "../pages/SignIn/SignIn";
@@ -35,6 +36,7 @@ import PasswordChange from "../pages/PasswordChange/PasswordChange";
 import THome from "../pages/Tweets/Home";
 import Compose from "../pages/Compose/Compose";
 import Geolocation from "../pages/Geolocation/Geolocation";
+import Create from '@material-ui/icons/Create';
 
 const drawerWidth = 240;
 const history = createBrowserHistory();
@@ -189,13 +191,6 @@ export default function Dashboard() {
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             {title}
           </Typography>
-
-          {/* For kicks */}
-          <IconButton color="inherit">
-            <Badge badgeContent={2} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
         </Toolbar>
       </AppBar>
 
@@ -216,7 +211,7 @@ export default function Dashboard() {
 
             {/* This icon collapses the left pane enough to show menu item icons */}
             <IconButton onClick={handleDrawerClose}>
-              <ChevronLeftIcon />
+            <MenuIcon />
             </IconButton>
           </div>
           <Divider />
@@ -227,7 +222,7 @@ export default function Dashboard() {
           {/* Geolocation menu item */}
           <ListItem button component={Link} to="/geolocation" onClick={onItemClick('Geolocation')}>
               <ListItemIcon>
-                <DashboardIcon />
+                <MapIcon />
               </ListItemIcon>
               <ListItemText primary="Geolocation" />
               { title === 'Geolocation' }
@@ -236,7 +231,7 @@ export default function Dashboard() {
             {/* Tweets menu item*/}
             <ListItem button component={Link} to="/tweets" onClick={onItemClick('Tweets')}>
               <ListItemIcon>
-                <DashboardIcon />
+                <ChatIcon />
               </ListItemIcon>
               <ListItemText primary="Tweets" />
               { title === 'Tweets' }
@@ -245,7 +240,7 @@ export default function Dashboard() {
             {/* Compose menu item*/}
             <ListItem button component={Link} to="/compose" onClick={onItemClick('Compose')}>
               <ListItemIcon>
-                <DashboardIcon />
+                <CreateIcon />
               </ListItemIcon>
               <ListItemText primary="Compose" />
               { title === 'Compose' }
@@ -254,7 +249,7 @@ export default function Dashboard() {
             {/* SignUp menu item */}
             <ListItem button component={Link} to="/signin" onClick={onItemClick('Sign In')}>
               <ListItemIcon>
-                <LayersIcon />
+                <AccountCircleIcon />
               </ListItemIcon>
               <ListItemText primary="Sign In" />
               { title === 'Sign In' }
