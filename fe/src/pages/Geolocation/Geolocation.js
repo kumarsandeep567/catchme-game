@@ -24,7 +24,7 @@ const styles = (theme) => ({
 function GeoLocation(props) {
 
   // If location is allowed, fetch x,y co-ordinates returned by
-  // useEffect() method
+  // useEffect() hook
   const {
     data: { latitude, longitude },
   } = useGeolocation();
@@ -69,10 +69,16 @@ function GeoLocation(props) {
     console.log("Updating postition now...")
   };
 
-  // UseEffect to update location every 10 seconds
+  // UseEffect hook to update location every 10 seconds
   useEffect(() => {
-    const interval = setInterval(updateLocation, 10000); // 10000 ms = 10 seconds
-    return () => clearInterval(interval); // Clear interval on component unmount
+
+    // Define the interval to update the players location
+    // Since the location fetching is handled by the updateLocation()
+    // call the method every 10 seconds (10 seconds = 10000 ms)
+    const interval = setInterval(updateLocation, 10000);
+
+    // Clear interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
