@@ -34,6 +34,7 @@ import PasswordReset from "../pages/PasswordReset/PasswordReset";
 import PasswordChange from "../pages/PasswordChange/PasswordChange";
 import THome from "../pages/Tweets/Home";
 import Compose from "../pages/Compose/Compose";
+import Geolocation from "../pages/Geolocation/Geolocation";
 
 const drawerWidth = 240;
 const history = createBrowserHistory();
@@ -223,6 +224,21 @@ export default function Dashboard() {
           {/* Left pane menu items */}
           <List>
 
+          {/* Geolocation menu item */}
+          <ListItem button component={Link} to="/geolocation" onClick={onItemClick('Geolocation')}>
+              <ListItemIcon>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Geolocation" />
+              { title === 'Geolocation' && 
+                <ListItemIcon>
+                  <IconButton onClick={handleDrawerCollapsed}>
+                    <ChevronLeftIcon />
+                  </IconButton>
+                </ListItemIcon>
+              }
+            </ListItem>
+
             {/* Tweets menu item*/}
             <ListItem button component={Link} to="/tweets" onClick={onItemClick('Tweets')}>
               <ListItemIcon>
@@ -281,6 +297,7 @@ export default function Dashboard() {
           <Route path="/signup" component={SignUp} />
           <Route path="/password_reset" component={PasswordReset} />
           <Route path="/password_change" component={PasswordChange} />
+          <Route path="/geolocation" component={Geolocation} />
           {/* <Route path="/activity"><ActivityHome /></Route> */}
         </main>
       </Router>
