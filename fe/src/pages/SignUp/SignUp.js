@@ -1,6 +1,6 @@
 import { useHistory } from 'react-router-dom'
 import { saveAuthorisation, isAuthorised } from '../../utils/auth'
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'

@@ -1,6 +1,6 @@
 import { useHistory } from 'react-router-dom'
 //import Page from 'material-ui-shell/lib/containers/Page/Page'
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
@@ -123,7 +123,7 @@ const SignIn = () => {
     console.log("sending out:");
     console.log(paramdict);
 
-    console.log("Signin.js: fetching from " + `${process.env.REACT_APP_API_SERVICE_URL}/login`)
+    console.log("Signin.js: fetching from ".concat(`${process.env.REACT_APP_API_SERVICE_URL}/login`))
     // verify user/pwd, get encoded userid as access and refresh tokens in return
     //fetch("http://localhost:5000/login", config)
     //fetch(`${process.env.REACT_APP_BE_NETWORK}:${process.env.REACT_APP_BE_PORT}/login`, config)
@@ -167,7 +167,7 @@ const SignIn = () => {
       body: JSON.stringify(paramdict)
     }
 
-    console.log("Signin.js: fetching from " + `${process.env.REACT_APP_API_SERVICE_URL}/fastlogin`)
+    console.log("Signin.js: fetching from ".concat(`${process.env.REACT_APP_API_SERVICE_URL}/fastlogin`))
     // verify user/pwd, get encoded userid as access and refresh tokens in return
     //fetch("http://localhost:5000/fastlogin", config)
     //fetch(`${process.env.REACT_APP_BE_NETWORK}:${process.env.REACT_APP_BE_PORT}/fastlogin`, config)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import TweetList from "./TweetList";
 //import axios from 'axios';
@@ -19,7 +19,7 @@ const THome = () => {
 	    setLoading(false);
     };
  
-    console.log("Home.js: fetching from " + `${process.env.REACT_APP_API_SERVICE_URL}/tweets-results`)
+    console.log("Home.js: fetching from ".concat(`${process.env.REACT_APP_API_SERVICE_URL}/tweets-results`))
     fetchData();
   }, []);
 

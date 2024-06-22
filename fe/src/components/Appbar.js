@@ -24,7 +24,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import LayersIcon from '@material-ui/icons/Layers';
 
-import config from '../config/config'
+// import config from '../config/config'
 
 // import your components:
 import Home from "../pages/Home";
@@ -157,10 +157,10 @@ export default function Dashboard() {
     setOpen(false);
     setCollapsed(false);
   };
-  const handleDrawerCollapsed = () => {
-    setCollapsed(true);
-    setOpen(false);
-  };
+  // const handleDrawerCollapsed = () => {
+  //   setCollapsed(true);
+  //   setOpen(false);
+  // };
   const onItemClick = title => () => {
     setTitle(title);
   };

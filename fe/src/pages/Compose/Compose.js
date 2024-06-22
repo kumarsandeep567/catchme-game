@@ -1,15 +1,15 @@
 import { useHistory } from 'react-router-dom'
-import { saveAuthorisation, isAuthorised } from '../../utils/auth'
-//import Page from 'material-ui-shell/lib/containers/Page/Page'
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
-//import Button from '@material-ui/Button'
 import Paper from '@material-ui/core/Paper'
+//import Button from '@material-ui/Button'
+// import { Link } from 'react-router-dom'
+// import { saveAuthorisation, isAuthorised } from '../../utils/auth'
+//import Page from 'material-ui-shell/lib/containers/Page/Page'
 //import MenuContext from 'material-ui-shell/lib/providers/Menu/Context'
-import { Link } from 'react-router-dom'
 
 const localStorageAuthKey = 'twtr:auth';
 function getAccessToken() {
@@ -96,7 +96,7 @@ const Compose = () => {
           },
           body: JSON.stringify(paramdict)
       }
-      console.log("Compose.js: fetching from " + `${process.env.REACT_APP_API_SERVICE_URL}/tweet`)
+      console.log("Compose.js: fetching from ".concat(`${process.env.REACT_APP_API_SERVICE_URL}/tweet`))
       // const response = await fetch("http://localhost:5000/tweet", config);
       //const response = await fetch(`${process.env.REACT_APP_BE_NETWORK}:${process.env.REACT_APP_BE_PORT}/tweet`, config);
       const response = await fetch(`${process.env.REACT_APP_API_SERVICE_URL}/tweet`, config);

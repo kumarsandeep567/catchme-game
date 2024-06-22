@@ -1,4 +1,4 @@
-import React, { lazy } from 'react'
+// import React, { lazy } from 'react'
 import { isAuthorised } from '../utils/auth'
 import { getAuth } from '../utils/auth'
 

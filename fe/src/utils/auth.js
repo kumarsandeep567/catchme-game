@@ -1,4 +1,4 @@
-const localStorageAuthKey = 'fwo:auth'
+const localStorageAuthKey = 'fwo:auth';
 export function saveAuthorisation(user) {
     if (typeof Storage !== 'undefined') {
         try {
@@ -31,7 +31,7 @@ export function getAuth() {
     try {
         if (typeof Storage !== 'undefined') {
             const auth = JSON.parse(localStorage.getItem(localStorageAuthKey))
-            if (auth === null) { auth = {}; auth.isAuthorised = false }
+            if (auth === null) { auth.isAuthorised = false }
             return auth;
         } else {
             return false

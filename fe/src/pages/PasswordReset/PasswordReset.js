@@ -1,11 +1,11 @@
 import { useHistory } from 'react-router-dom'
-import { saveAuthorisation, isAuthorised } from '../../utils/auth'
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 import Paper from '@material-ui/core/Paper'
+// import { saveAuthorisation, isAuthorised } from '../../utils/auth'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -50,7 +50,7 @@ const PasswordReset = () => {
   const classes = useStyles()
   const history = useHistory()
   const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  // const [password, setPassword] = useState('')
   // const { setAuthMenuOpen } = useContext(MenuContext)
 
   function handleSubmit(event) {
