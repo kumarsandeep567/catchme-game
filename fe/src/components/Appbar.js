@@ -230,13 +230,7 @@ export default function Dashboard() {
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary="Geolocation" />
-              { title === 'Geolocation' && 
-                <ListItemIcon>
-                  <IconButton onClick={handleDrawerCollapsed}>
-                    <ChevronLeftIcon />
-                  </IconButton>
-                </ListItemIcon>
-              }
+              { title === 'Geolocation' }
             </ListItem>
 
             {/* Tweets menu item*/}
@@ -245,13 +239,7 @@ export default function Dashboard() {
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary="Tweets" />
-              { title === 'Tweets' && 
-                <ListItemIcon>
-                  <IconButton onClick={handleDrawerCollapsed}>
-                    <ChevronLeftIcon />
-                  </IconButton>
-                </ListItemIcon>
-              }
+              { title === 'Tweets' }
             </ListItem>
 
             {/* Compose menu item*/}
@@ -260,13 +248,7 @@ export default function Dashboard() {
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary="Compose" />
-              { title === 'Compose' && 
-                <ListItemIcon>
-                  <IconButton onClick={handleDrawerCollapsed}>
-                    <ChevronLeftIcon />
-                  </IconButton>
-                </ListItemIcon>
-              }
+              { title === 'Compose' }
             </ListItem>
 
             {/* SignUp menu item */}
@@ -275,13 +257,7 @@ export default function Dashboard() {
                 <LayersIcon />
               </ListItemIcon>
               <ListItemText primary="Sign In" />
-              { title === 'Sign In' && 
-                <ListItemIcon>
-                  <IconButton onClick={handleDrawerCollapsed}>
-                    <ChevronLeftIcon />
-                  </IconButton>
-                </ListItemIcon>
-              }
+              { title === 'Sign In' }
             </ListItem>
           </List>
         </Drawer>
