@@ -9,6 +9,7 @@ import random
 import string
 from flask_bcrypt import Bcrypt
 import jwt
+from redis_trial import *
 
 # This variable will store the application settings and
 # made available globally (used by app_settings() method)
@@ -145,6 +146,7 @@ def decode_token(token):
 @app.route("/login", methods=["POST"])
 def login():
     # TODO
+    return
 
 
 # ==========================================================
@@ -168,11 +170,15 @@ def get_player_location():
         print("Player Longitude is ", player_longitude)
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
+        store_user_location(player_id, player_latitude, player_longitude)
+
+        location = fetch_user_location(user_id)
+
         # Create a dictionary with player details to send back as a response
         player_details = {
             'player_id': player_id,
-            'player_latitude': player_latitude,
-            'player_longitude': player_longitude
+            'player_latitude': location[0],
+            'player_longitude': location[1]
         }
 
         # Return a HTTP 200 OK status with player details
@@ -203,6 +209,7 @@ def get_player_location():
 
 def before_first_request():
     print("Starting python server for the first time")
+    app_settings()
 
 # Instead use app.app_context()
 with app.app_context():

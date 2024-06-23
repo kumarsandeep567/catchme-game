@@ -91,6 +91,8 @@ function GeoLocation(props) {
           alert("Error occured in responseData!");
           console.error(error);
         }
+      }else{
+        console.log(response)
       }
     } catch (error) {
       alert("Error occurred in reportPlayerLocation!");
