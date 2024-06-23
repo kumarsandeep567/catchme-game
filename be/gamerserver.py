@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, g
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from http import HTTPStatus
 from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
@@ -96,6 +96,7 @@ def read_app_settings(setting_name):
 # ==========================================================
 
 @app.route("/health")
+@cross_origin()
 def health(): 
     return """
         <h3>
@@ -153,6 +154,7 @@ def decode_token(token):
 # players 
 # ==========================================================
 @app.route("/login", methods=["POST"])
+@cross_origin()
 def login():
     try:
         user = request.json['name']
@@ -191,13 +193,15 @@ def login():
                 user_id = read_app_settings('user_ids')[available_users.index(user)]
                 access_token = encode_token(user_id, "access")
                 refresh_token = encode_token(user_id, "refresh")
+                expiration_day = 1
                 g['logged_userId'] = user_id
                 
                 # Prepare the tokens for serialization
                 server_response = ({
                     "userId": user_id,
                     "access_token": access_token,
-                    "refresh_token": refresh_token
+                    "refresh_token": refresh_token,
+                    "expiration_day": 1
                 }, HTTPStatus.OK)
 
         return jsonify(server_response)
@@ -219,6 +223,7 @@ def login():
 # ==========================================================
 
 @app.route("/location", methods = ["POST"])
+@cross_origin()
 def get_player_location():
     try:
         
