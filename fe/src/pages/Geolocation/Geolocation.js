@@ -87,7 +87,8 @@ function GeoLocation(props) {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
         },
-        body: JSON.stringify(requestFields)
+        body: JSON.stringify(requestFields),
+        credentials: 'include'
       }
 
       // Send the player details and wait for a response 
@@ -146,23 +147,20 @@ function GeoLocation(props) {
     // Interval to update the player's location every 10 seconds
     const interval = setInterval(updateLocation, 10000);
 
-    // Clear interval on component unmount
-    return () => clearInterval(interval);
-  }, [updateLocation]);
+    // Setup socket listener for location updates if socket exists
+    if (socket) {
+      socket.on("location_update", ({ userId, lat, lon }) => {
+        console.log(`data: userId: ${userId}, lat: ${lat}, lng: ${lon}`);
+        // setLongitude(lng); // Uncomment and use if needed
+      });
+    }
 
-  // UseEffect hook to broacast location
-  useEffect(() => {
-    socket.on('location_update', (data) => {
-      setUsers((prevUsers) => ({ ...prevUsers, ...data }));
-    });
-
-    socket.on('all_users', (data) => {
-      setUsers(data);
-    });
-
+    // Cleanup function to clear interval and remove socket listener on component unmount
     return () => {
-      socket.off('location_update');
-      socket.off('all_users');
+      clearInterval(interval);
+      if (socket) {
+        socket.off("location_update");
+      }
     };
   }, []);
 
