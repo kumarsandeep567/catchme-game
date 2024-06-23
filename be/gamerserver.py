@@ -207,3 +207,7 @@ def before_first_request():
 # Instead use app.app_context()
 with app.app_context():
     before_first_request()
+
+# ==========================================================
+# +++ TO RUN THIS FILE, RUN wsgi.py FILE +++
+# ==========================================================
