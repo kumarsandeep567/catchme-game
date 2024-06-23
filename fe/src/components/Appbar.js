@@ -36,7 +36,6 @@ import PasswordChange from "../pages/PasswordChange/PasswordChange";
 import THome from "../pages/Tweets/Home";
 import Compose from "../pages/Compose/Compose";
 import Geolocation from "../pages/Geolocation/Geolocation";
-import Create from '@material-ui/icons/Create';
 
 const drawerWidth = 240;
 const history = createBrowserHistory();

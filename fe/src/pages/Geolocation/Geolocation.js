@@ -24,7 +24,7 @@ const styles = (theme) => ({
 function GeoLocation(props) {
 
   // If location is allowed, fetch x,y co-ordinates returned by
-  // useEffect() hook
+  // useEffect() hook in useGeolocation.js
   const {
     data: { latitude, longitude },
   } = useGeolocation();
@@ -48,7 +48,58 @@ function GeoLocation(props) {
   // Set the default center for the map
   const [center, setCenter] = useState([defaultLaitude, defaultLongitude]);
 
-  // Function to update the location
+  // Report player location (and any other data)
+  const reportPlayerLocation = async (userId, latitude, longitude) => {
+
+    // Organize the data to send in a dictionary
+    const requestFields = {
+      'id': userId,
+      'lat': latitude,
+      'lon': longitude
+    }
+
+    // Attempt to send the data to the Flask server
+    try {
+
+      // URL of the Flask application and the route
+      const URI = "http://localhost:5000/location";
+
+      // Define the necessary data, along with the player
+      // data (as a JSON) to send to the Flask server. 
+      const requestConfiguration = {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestFields)
+      }
+
+      // Send the player details and wait for a response 
+      // (using async await)
+      const response = await fetch(URI, requestConfiguration);
+
+      // Check if response received is HTTP 200 OK
+      if (response.ok) {
+        console.log("Server responded!");
+
+        // Try decoding the response data
+        try{
+          const responseData = await response.json();
+          console.log(responseData);
+        } catch (error) {
+          alert("Error occured in responseData!");
+          console.error(error);
+        }
+      }
+    } catch (error) {
+      alert("Error occurred in reportPlayerLocation!");
+      console.error(error);
+    }
+    
+  };
+
+  // Function to update the location and report changes to Flask server
   const updateLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -58,6 +109,7 @@ function GeoLocation(props) {
           setHea(position.coords.heading);
           setSpd(position.coords.speed);
           setCenter([position.coords.latitude, position.coords.longitude]);
+          reportPlayerLocation(1, position.coords.latitude, position.coords.longitude);
         },
         (e) => {
           console.log(e);
@@ -84,12 +136,11 @@ function GeoLocation(props) {
   return (
     <div style={{ backgroundColor: "white", padding: 72 }}>
       <button onClick={updateLocation}>Get Location</button>
-      <h1>Coordinates</h1>
       <p>Latitude: {latitude}</p>
       <p>Longitude: {longitude}</p>
 
       {/* These are not used but defined above */}
-      {/* 'AND' these values for now to hide them */}
+      {/* 'AND' these values with 'null' for now to hide them */}
       {null && Lat && <p>Latitude: {Lat}</p>}
       {null && Lon && <p>Longitude: {Lon}</p>}
       {null && Hea && <p>Heading: {Hea}</p>}

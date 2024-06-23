@@ -23,7 +23,7 @@ function getAccessToken() {
           console.log(ex);
       }
   } else {
-      // No web storage Support :-(
+      // No web storage Support :(
   }
 }
 
