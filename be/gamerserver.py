@@ -78,6 +78,9 @@ def app_settings():
         # Assign these users their user_id
         g['user_ids'] = list(range(0, len(g['users'])))
 
+    if 'logged_user' not in g:
+        g['logged_userId'] = None
+        
     # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
 # To make reading 'g' more clean, hide the functionality
@@ -188,7 +191,8 @@ def login():
                 user_id = read_app_settings('user_ids')[available_users.index(user)]
                 access_token = encode_token(user_id, "access")
                 refresh_token = encode_token(user_id, "refresh")
-
+                g['logged_userId'] = user_id
+                
                 # Prepare the tokens for serialization
                 server_response = ({
                     "userId": user_id,
