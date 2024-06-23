@@ -49,6 +49,9 @@ g = dict()
 # List to track the broadcast receipents
 broadcast_receipents = dict()
 
+# SocketIO instance
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 # ==========================================================
 # +++ Application settings +++
