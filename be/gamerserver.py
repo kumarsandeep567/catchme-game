@@ -2,6 +2,7 @@ import os
 import jwt
 from http import HTTPStatus
 from flask_bcrypt import Bcrypt
+import jwt
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
@@ -286,11 +287,20 @@ def get_player_location():
         print("Player Longitude is ", player_longitude)
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
+        store_user_location(player_id, player_latitude, player_longitude)
+
+        location = fetch_user_location(user_id)
+
         # Create a dictionary with player details to send back as a response
         player_details = {
             'player_id': player_id,
             'player_latitude': player_latitude,
             'player_longitude': player_longitude
+        }
+
+        broadcast_receipents[player_id] = {
+            'latitude': player_latitude,
+            'longitude': player_longitude
         }
 
 
