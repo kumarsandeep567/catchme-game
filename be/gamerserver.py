@@ -9,6 +9,8 @@ import random
 import string
 from flask_bcrypt import Bcrypt
 import jwt
+from flask_socketio import SocketIO, emit
+
 
 # This variable will store the application settings and
 # made available globally (used by app_settings() method)
@@ -22,6 +24,9 @@ CORS(app)
 
 # To use Bcrypt APIs, wrap the Flask app in Bcrypt()
 bcrypt = Bcrypt(app)
+
+# SocketIO instance
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 # ==========================================================
@@ -222,6 +227,11 @@ def login():
 def get_player_location():
     try:
         
+        # Get the player details from the request and broadcast
+        data = request.get_json()
+        data['userId'] = g['logged_userId']
+        socketio.emit('location_update', data)
+        
         # Try getting the player details from the query parameters
         player_id = request.json['id']
         player_latitude = request.json['lat']
@@ -258,6 +268,14 @@ def get_player_location():
 
         return jsonify(server_response)
 
+@socketio.on('connect')
+def handle_connect():
+    # location = r.get('user_location')
+    # if location:
+        # lat, lon = map(float, location.decode('utf-8').split(','))
+    print('Client connected')
+    emit('location_update', {'userId': g['logged_userId'], 'lat':42.3385268, 'lon':-71.0875192})
+    
 # ==========================================================
 # +++ App pre-run configuration +++
 # ==========================================================
