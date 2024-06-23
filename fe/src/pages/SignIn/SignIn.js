@@ -134,6 +134,7 @@ const SignIn = () => {
         // save to local storage
         console.log("received these keys in return:")
         console.log(data);
+        console.log(data[0].userId);
         console.log(data[0].access_token);
         console.log(data[0].refresh_token);
         console.log('---');

@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 from http import HTTPStatus
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
 import os
 import json
@@ -75,6 +75,13 @@ def app_settings():
         for p in g['passwords']:
             g['password_hashes'].append(bcrypt.generate_password_hash(p, 13).decode('utf-8'))
         print("g['password_hashes]=", g['password_hashes'])
+
+        # Assign these users their user_id
+        g['user_ids'] = list(range(0, len(g['users'])))
+
+    if 'logged_user' not in g:
+        g['logged_userId'] = None
+        
     # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
 # To make reading 'g' more clean, hide the functionality
@@ -114,9 +121,12 @@ def encode_token(user_id, token_type):
         expiration_time = read_app_settings("refresh_token_expiration")
 
     # Define the contents of the token
+    expiration_time = datetime.utcnow() + timedelta(seconds = expiration_time)
+    issued_at =  datetime.utcnow()
+
     payload = {
-        "expiration_time": datetime.now(datetime.UTC) + timedelta(seconds = expiration_time),
-        "issued_at": datetime.now(datetime.UTC),
+        "expiration_time": expiration_time.timestamp(),
+        "issued_at": issued_at.timestamp(),
         "subject": user_id,
     }
 
@@ -145,8 +155,62 @@ def decode_token(token):
 # ==========================================================
 @app.route("/login", methods=["POST"])
 def login():
-    # TODO
-    return
+    try:
+        user = request.json['name']
+        password = request.json['password']
+
+        # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
+        
+        # Get all users setup by app_settings()
+        available_users = read_app_settings('users')
+
+        if user not in available_users:
+
+            # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
+            print('Unknown user trying to login ...')
+
+            server_response = (
+                "Error! This user does not have an account", 
+                HTTPStatus.UNAUTHORIZED
+            )
+        else:
+
+            # Get the user's hashed password from app_settings()
+            password_hash = read_app_settings('password_hashes')[available_users.index(user)]
+
+            # Hash the user provided password and compare it with
+            # password_hash
+            if not bcrypt.check_password_hash(password_hash, password):
+
+                # Wrong password
+                server_response = (
+                    "ERROR: Password mismatch", 
+                    HTTPStatus.UNAUTHORIZED
+                )
+            else:
+                # Create the tokens for the user
+                user_id = read_app_settings('user_ids')[available_users.index(user)]
+                access_token = encode_token(user_id, "access")
+                refresh_token = encode_token(user_id, "refresh")
+                g['logged_userId'] = user_id
+                
+                # Prepare the tokens for serialization
+                server_response = ({
+                    "userId": user_id,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                }, HTTPStatus.OK)
+
+        return jsonify(server_response)
+    except Exception as e:
+
+        # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
+        print("Something went wrong in '/login' method")
+        print(e)
+        return jsonify((
+            "Something went wrong in '/login' method", 
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        ))
 
 
 # ==========================================================
@@ -214,6 +278,7 @@ def before_first_request():
 # Instead use app.app_context()
 with app.app_context():
     before_first_request()
+
 
 # ==========================================================
 # +++ TO RUN THIS FILE, RUN wsgi.py FILE +++
