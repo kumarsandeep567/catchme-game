@@ -93,6 +93,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+//  ==========================================================
+//  +++ Set cookies after successful SignIn +++
+//  ==========================================================
+
+const setCookie = (userId, accessToken, days) => {
+  const expirationDate = new Date();
+  expirationDate.setDate(expirationDate.getDate() + days);
+  document.cookie = `userId=${userId}; accessToken=${accessToken}; expires=${expirationDate.toUTCString()}; path=/`;
+ };
+
 
 const SignIn = () => {
   const classes = useStyles()
@@ -134,9 +144,10 @@ const SignIn = () => {
         // save to local storage
         console.log("received these keys in return:")
         console.log(data);
-        console.log(data[0].userId);
-        console.log(data[0].access_token);
-        console.log(data[0].refresh_token);
+        // console.log(data[0].userId);
+        // console.log(data[0].access_token);
+        // console.log(data[0].refresh_token);
+        setCookie(data[0].userId, data[0].access_token, data[0].expiration_day);
         console.log('---');
         saveAuthorisation({
           access: data[0].access_token,

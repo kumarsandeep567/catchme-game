@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, g
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from http import HTTPStatus
 from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
@@ -10,6 +10,7 @@ import string
 from flask_bcrypt import Bcrypt
 import jwt
 from redis_trial import *
+from flask_socketio import SocketIO, emit
 
 # This variable will store the application settings and
 # made available globally (used by app_settings() method)
@@ -23,6 +24,9 @@ CORS(app)
 
 # To use Bcrypt APIs, wrap the Flask app in Bcrypt()
 bcrypt = Bcrypt(app)
+
+# SocketIO instance
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 # ==========================================================
@@ -97,6 +101,7 @@ def read_app_settings(setting_name):
 # ==========================================================
 
 @app.route("/health")
+@cross_origin()
 def health(): 
     return """
         <h3>
@@ -154,6 +159,7 @@ def decode_token(token):
 # players 
 # ==========================================================
 @app.route("/login", methods=["POST"])
+@cross_origin()
 def login():
     try:
         user = request.json['name']
@@ -192,13 +198,15 @@ def login():
                 user_id = read_app_settings('user_ids')[available_users.index(user)]
                 access_token = encode_token(user_id, "access")
                 refresh_token = encode_token(user_id, "refresh")
+                expiration_day = 1
                 g['logged_userId'] = user_id
                 
                 # Prepare the tokens for serialization
                 server_response = ({
                     "userId": user_id,
                     "access_token": access_token,
-                    "refresh_token": refresh_token
+                    "refresh_token": refresh_token,
+                    "expiration_day": 1
                 }, HTTPStatus.OK)
 
         return jsonify(server_response)
@@ -220,8 +228,14 @@ def login():
 # ==========================================================
 
 @app.route("/location", methods = ["POST"])
+@cross_origin()
 def get_player_location():
     try:
+        
+        # Get the player details from the request and broadcast
+        data = request.get_json()
+        data['userId'] = g['logged_userId']
+        socketio.emit('location_update', data)
         
         # Try getting the player details from the query parameters
         player_id = request.json['id']
@@ -263,6 +277,14 @@ def get_player_location():
 
         return jsonify(server_response)
 
+@socketio.on('connect')
+def handle_connect():
+    # location = r.get('user_location')
+    # if location:
+        # lat, lon = map(float, location.decode('utf-8').split(','))
+    print('Client connected')
+    emit('location_update', {'userId': g['logged_userId'], 'lat':42.3385268, 'lon':-71.0875192})
+    
 # ==========================================================
 # +++ App pre-run configuration +++
 # ==========================================================
