@@ -1,18 +1,11 @@
+import os
+import jwt
+from http import HTTPStatus
+from flask_bcrypt import Bcrypt
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS, cross_origin
-from http import HTTPStatus
+from flask_socketio import SocketIO, emit
 from datetime import datetime, timedelta, timezone
-from bson.objectid import ObjectId
-import os
-import json
-import random
-import string
-from flask_bcrypt import Bcrypt
-import jwt
-
-# This variable will store the application settings and
-# made available globally (used by app_settings() method)
-g = dict()
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -20,8 +13,18 @@ app = Flask(__name__)
 # Allow Cross Origin Resource Sharing with default settings
 CORS(app)
 
+# Initialize SocketIO for broadcasting service
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 # To use Bcrypt APIs, wrap the Flask app in Bcrypt()
 bcrypt = Bcrypt(app)
+
+# This variable will store the application settings and
+# made available globally (used by app_settings() method)
+g = dict()
+
+# List to track the broadcast receipents
+broadcast_receipents = dict()
 
 
 # ==========================================================
@@ -263,16 +266,19 @@ def get_player_location():
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
         # Create a dictionary with player details to send back as a response
-        player_details = {
-            'player_id': player_id,
-            'player_latitude': player_latitude,
-            'player_longitude': player_longitude
+        broadcast_receipents[player_id] = {
+            'latitude': player_latitude,
+            'longitude': player_longitude
         }
 
-        # Return a HTTP 200 OK status with player details
-        server_response = (player_details, HTTPStatus.OK)
+        # Broadcast logged-in user's location to all connected users
+        socketio.emit(
+            'location_update', 
+            {player_id: broadcast_receipents[player_id]}
+        )
 
-        return jsonify(server_response)
+        # Return a HTTP 200 OK status with player details
+        server_response = (broadcast_receipents[player_id], HTTPStatus.OK)
 
     except Exception as e:
 
@@ -285,7 +291,15 @@ def get_player_location():
         )
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
-        return jsonify(server_response)
+    return jsonify(server_response)
+
+# ==========================================================
+# +++ Broadcast handler +++
+# Handle broadcast connection
+# ==========================================================
+@socketio.on('connect')
+def handle_connect():
+    emit('all_users', broadcast_receipents)
 
 # ==========================================================
 # +++ App pre-run configuration +++

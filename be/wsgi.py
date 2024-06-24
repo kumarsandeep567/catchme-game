@@ -3,7 +3,7 @@
 # object to run the application’s request handlers upon parsing the URL.
 
 # Import the Flask app from gameserver.py
-from gamerserver import app
+from gamerserver import app, socketio
 
 # Run the application from the main() method
 def main() -> None:
@@ -11,7 +11,7 @@ def main() -> None:
     app_port = 5000
     app_debug_state = True
 
-    app.run(host = app_host, port = app_port, debug = app_debug_state)
+    socketio.run(app, host = app_host, port = app_port, debug = app_debug_state)
 
 # Application entrypoint
 if __name__ == '__main__':
