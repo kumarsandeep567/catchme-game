@@ -1,6 +1,10 @@
+import os
+import jwt
+from http import HTTPStatus
+from flask_bcrypt import Bcrypt
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS, cross_origin
-from http import HTTPStatus
+from flask_socketio import SocketIO, emit
 from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
 import os
@@ -22,11 +26,21 @@ app = Flask(__name__)
 # Allow Cross Origin Resource Sharing with default settings
 CORS(app)
 
+# Initialize SocketIO for broadcasting service
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 # To use Bcrypt APIs, wrap the Flask app in Bcrypt()
 bcrypt = Bcrypt(app)
 
 # SocketIO instance
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# This variable will store the application settings and
+# made available globally (used by app_settings() method)
+g = dict()
+
+# List to track the broadcast receipents
+broadcast_receipents = dict()
 
 
 # ==========================================================
@@ -272,24 +286,22 @@ def get_player_location():
         print("Player Longitude is ", player_longitude)
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
-        store_user_location(player_id, player_latitude, player_longitude)
-        print("Location stored in Redis")
-        print(fetch_user_location(player_id))
-        location = fetch_user_location(player_id)
-        print("Location fetched from Redis: ", location)
-        print("Location fetched from Redis: ", location[0], location[1])
-
         # Create a dictionary with player details to send back as a response
         player_details = {
             'player_id': player_id,
-            'player_latitude': location[0],
-            'player_longitude': location[1]
+            'player_latitude': player_latitude,
+            'player_longitude': player_longitude
         }
 
-        # Return a HTTP 200 OK status with player details
-        server_response = (player_details, HTTPStatus.OK)
 
-        return jsonify(server_response)
+        # Broadcast logged-in user's location to all connected users
+        socketio.emit(
+            'location_update', 
+            {player_id: broadcast_receipents[player_id]}
+        )
+
+        # Return a HTTP 200 OK status with player details
+        server_response = (broadcast_receipents[player_id], HTTPStatus.OK)
 
     except Exception as e:
 

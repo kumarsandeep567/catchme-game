@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { withStyles } from "@material-ui/core/styles";
 import useGeolocation from "./useGeolocation";
 import io from "socket.io-client";
-
-const socket = io(`${process.env.REACT_APP_API_SERVICE_URL}`);
 
 const styles = (theme) => ({
   root: {
@@ -23,6 +21,12 @@ const styles = (theme) => ({
     width: "100%",
   },
 });
+
+// Server address and port defined as env variables
+const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
+
+// Establish websocket connection with Flask application
+const socket = io(server_address);
 
 function GeoLocation(props) {
 
@@ -51,6 +55,9 @@ function GeoLocation(props) {
   // Set the default center for the map
   const [center, setCenter] = useState([defaultLatitude, defaultLongitude]);
 
+  // Set default active users 
+  const [users, setUsers] = useState({});
+
   // Read cookie and return the required value
   const readCookie = (name) => {
 
@@ -63,7 +70,7 @@ function GeoLocation(props) {
    };
 
   // Report player location (and any other data)
-  const reportPlayerLocation = async (userId, latitude, longitude) => {
+  const reportPlayerLocation = useCallback((userId, latitude, longitude) => {
 
     // Organize the data to send in a dictionary
     const requestFields = {
@@ -74,9 +81,6 @@ function GeoLocation(props) {
 
     // Attempt to send the data to the Flask server
     try {
-
-      // Server address and port defined as env variables
-      const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
 
       // URL of the Flask application and the route
       const URI = server_address.concat("/location");
@@ -95,7 +99,7 @@ function GeoLocation(props) {
 
       // Send the player details and wait for a response 
       // (using async await)
-      const response = await fetch(URI, requestConfiguration);
+      const response = fetch(URI, requestConfiguration);
 
       // Check if response received is HTTP 200 OK
       if (response.ok) {
@@ -103,7 +107,7 @@ function GeoLocation(props) {
 
         // Try decoding the response data
         try{
-          const responseData = await response.json();
+          const responseData = response.json();
           console.log(responseData);
         } catch (error) {
           alert("Error occured in responseData!");
@@ -117,10 +121,10 @@ function GeoLocation(props) {
       console.error(error);
     }
     
-  };
+  }, []);
 
   // Function to update the location and report changes to Flask server
-  const updateLocation = () => {
+  const updateLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -143,26 +147,29 @@ function GeoLocation(props) {
       console.log("GeoLocation not supported by your browser!");
     }
     console.log("Updating postition now...")
-  };
+  }, [reportPlayerLocation]);
 
   useEffect(() => {
     // Interval to update the player's location every 10 seconds
     const interval = setInterval(updateLocation, 10000);
 
-    // Setup socket listener for location updates if socket exists
-    if (socket) {
-      socket.on("location_update", ({ userId, lat, lon }) => {
-        console.log(`data: userId: ${userId}, lat: ${lat}, lng: ${lon}`);
-        // setLongitude(lng); // Uncomment and use if needed
-      });
-    }
+    // Clear interval on component unmount
+    return () => clearInterval(interval);
+  }, [updateLocation]);
 
-    // Cleanup function to clear interval and remove socket listener on component unmount
+  // UseEffect hook to broacast location
+  useEffect(() => {
+    socket.on('location_update', (data) => {
+      setUsers((prevUsers) => ({ ...prevUsers, ...data }));
+    });
+
+    socket.on('all_users', (data) => {
+      setUsers(data);
+    });
+
     return () => {
-      clearInterval(interval);
-      if (socket) {
-        socket.off("location_update");
-      }
+      socket.off('location_update');
+      socket.off('all_users');
     };
   }, []);
 
@@ -193,9 +200,14 @@ function GeoLocation(props) {
         }}
       >
         {/* Added 3 markers to represent 3 players on the map */}
-        <Marker width={50} anchor={[Lat || latitude, Lon || longitude]} />
-        <Marker width={50} anchor={[Lat ? Lat + 0.2 : latitude + 0.2, Lon ? Lon + 0.2 : longitude + 0.2]} />
-        <Marker width={50} anchor={[Lat ? Lat - 0.2 : latitude - 0.2, Lon ? Lon - 0.2 : longitude - 0.2]} />
+        
+        {Object.keys(users).map((userId) => (
+          <Marker
+            key={userId}
+            width={50}
+            anchor={[users[userId].latitude, users[userId].longitude]}
+          />
+        ))}
 
         {/* Add default +/- buttons to allow zoom controls on the map */}
         <ZoomControl />
