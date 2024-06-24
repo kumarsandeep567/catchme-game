@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { withStyles } from "@material-ui/core/styles";
 import useGeolocation from "./useGeolocation";
+import io from "socket.io-client";
+
+const socket = io(`${process.env.REACT_APP_API_SERVICE_URL}`);
 
 const styles = (theme) => ({
   root: {
@@ -72,7 +75,8 @@ function GeoLocation(props) {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestFields)
+        body: JSON.stringify(requestFields),
+        credentials: 'include'
       }
 
       // Send the player details and wait for a response 
@@ -123,16 +127,25 @@ function GeoLocation(props) {
     console.log("Updating postition now...")
   };
 
-  // UseEffect hook to update location every 10 seconds
   useEffect(() => {
-
-    // Define the interval to update the players location
-    // Since the location fetching is handled by the updateLocation()
-    // call the method every 10 seconds (10 seconds = 10000 ms)
+    // Interval to update the player's location every 10 seconds
     const interval = setInterval(updateLocation, 10000);
 
-    // Clear interval on component unmount
-    return () => clearInterval(interval);
+    // Setup socket listener for location updates if socket exists
+    if (socket) {
+      socket.on("location_update", ({ userId, lat, lon }) => {
+        console.log(`data: userId: ${userId}, lat: ${lat}, lng: ${lon}`);
+        // setLongitude(lng); // Uncomment and use if needed
+      });
+    }
+
+    // Cleanup function to clear interval and remove socket listener on component unmount
+    return () => {
+      clearInterval(interval);
+      if (socket) {
+        socket.off("location_update");
+      }
+    };
   }, []);
 
   return (

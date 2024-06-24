@@ -234,7 +234,8 @@ def get_player_location():
         
         # Get the player details from the request and broadcast
         data = request.get_json()
-        data['userId'] = g['logged_userId']
+        user_id = g['logged_userId']
+        data['userId'] = user_id
         socketio.emit('location_update', data)
         
         # Try getting the player details from the query parameters
