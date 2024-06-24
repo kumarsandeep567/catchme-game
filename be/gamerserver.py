@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify, g
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 from datetime import datetime, timedelta, timezone
+from redis_trial import *
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -25,7 +26,6 @@ g = dict()
 
 # List to track the broadcast receipents
 broadcast_receipents = dict()
-
 
 # ==========================================================
 # +++ Application settings +++
@@ -253,12 +253,17 @@ def login():
 @cross_origin()
 def get_player_location():
     try:
-        
+       
         # Try getting the player details from the query parameters
         player_id = request.json['id']
         player_latitude = request.json['lat']
         player_longitude = request.json['lon']
 
+         # Get the player details from the request and broadcast
+        data = request.get_json()
+        data['userId'] = player_id
+        socketio.emit('location_update', data)
+        
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
         # Disabling the print() statements temporarily
@@ -268,18 +273,28 @@ def get_player_location():
         
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
+        store_user_location(player_id, player_latitude, player_longitude)
+
+        location = fetch_user_location(user_id)
+
         # Create a dictionary with player details to send back as a response
         broadcast_receipents[player_id] = {
             'latitude': player_latitude,
             'longitude': player_longitude
         }
 
+        broadcast_receipents[player_id] = {
+            'latitude': player_latitude,
+            'longitude': player_longitude
+        }
+
+
         # Broadcast logged-in user's location to all connected users
         socketio.emit(
             'location_update', 
             {player_id: broadcast_receipents[player_id]}
         )
-
+      
         # Return a HTTP 200 OK status with player details
         server_response = (broadcast_receipents[player_id], HTTPStatus.OK)
 
@@ -303,7 +318,7 @@ def get_player_location():
 @socketio.on('connect')
 def handle_connect():
     emit('all_users', broadcast_receipents)
-
+    
 # ==========================================================
 # +++ App pre-run configuration +++
 # ==========================================================

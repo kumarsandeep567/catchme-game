@@ -92,6 +92,7 @@ function GeoLocation(props) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify(requestFields)
       }
@@ -112,6 +113,8 @@ function GeoLocation(props) {
           alert("Error occured in responseData!");
           console.error(error);
         }
+      }else{
+        console.log(response)
       }
     } catch (error) {
       alert("Error occurred in reportPlayerLocation!");
@@ -146,8 +149,8 @@ function GeoLocation(props) {
     console.log("Updating postition now...")
   }, [reportPlayerLocation]);
 
-  // UseEffect hook to update location every 10 seconds
-  useEffect(() => {
+   // UseEffect hook to update location every 10 seconds
+   useEffect(() => {
 
     // Define the interval to update the players location
     // Since the location fetching is handled by the updateLocation()
