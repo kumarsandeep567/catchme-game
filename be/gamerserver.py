@@ -1,20 +1,12 @@
 import os
 import jwt
 from http import HTTPStatus
+from flask_bcrypt import Bcrypt
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 from datetime import datetime, timedelta, timezone
-from bson.objectid import ObjectId
-import os
-import json
-import random
-import string
-from flask_bcrypt import Bcrypt
-import jwt
 from redis_trial import *
-from flask_socketio import SocketIO, emit
-
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -326,16 +318,6 @@ def get_player_location():
 @socketio.on('connect')
 def handle_connect():
     emit('all_users', broadcast_receipents)
-
-@socketio.on('connect')
-def handle_connect():
-    # location = r.get('user_location')
-    # if location:
-        # lat, lon = map(float, location.decode('utf-8').split(','))
-    user_id = g['logged_userId']
-    location = fetch_user_location(user_id)
-    print('Client connected')
-    emit('location_update', {'userId': user_id, 'lat':location[0], 'lon':location[1]})
     
 # ==========================================================
 # +++ App pre-run configuration +++
