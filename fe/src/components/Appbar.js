@@ -146,9 +146,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Dashboard() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
-  const [collapsed, setCollapsed] = React.useState(false);
-  const [title, setTitle] = React.useState('Home');
+  const [open, setOpen] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(true);
+  const pathname = window.location.pathname;
+  const trimmedPath = pathname.substring(1);
+  const capitalizedPath = trimmedPath.charAt(0).toUpperCase() + trimmedPath.slice(1);
+  const [title, setTitle] = React.useState(capitalizedPath);
 
   const handleDrawerOpen = () => {
     setOpen(true);
