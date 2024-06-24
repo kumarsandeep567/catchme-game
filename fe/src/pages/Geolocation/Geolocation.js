@@ -74,9 +74,9 @@ function GeoLocation(props) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
-        body: JSON.stringify(requestFields),
-        credentials: 'include'
+        body: JSON.stringify(requestFields)
       }
 
       // Send the player details and wait for a response 
@@ -151,8 +151,8 @@ function GeoLocation(props) {
   return (
     <div style={{ backgroundColor: "white", padding: 72 }}>
       <button onClick={updateLocation}>Get Location</button>
-      <p>Latitude: {latitude}</p>
-      <p>Longitude: {longitude}</p>
+      <p>Latitude: {Lat}</p>
+      <p>Longitude: {Lon}</p>
 
       {/* These are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}

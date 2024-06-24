@@ -231,18 +231,17 @@ def login():
 @cross_origin()
 def get_player_location():
     try:
-        
-        # Get the player details from the request and broadcast
-        data = request.get_json()
-        user_id = g['logged_userId']
-        data['userId'] = user_id
-        socketio.emit('location_update', data)
-        
+       
         # Try getting the player details from the query parameters
         player_id = request.json['id']
         player_latitude = request.json['lat']
         player_longitude = request.json['lon']
 
+         # Get the player details from the request and broadcast
+        data = request.get_json()
+        data['userId'] = player_id
+        socketio.emit('location_update', data)
+        
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         print("Player ID is ", player_id)
         print("Player Latitude is ", player_latitude)
@@ -250,8 +249,11 @@ def get_player_location():
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
         store_user_location(player_id, player_latitude, player_longitude)
-
-        location = fetch_user_location(user_id)
+        print("Location stored in Redis")
+        print(fetch_user_location(player_id))
+        location = fetch_user_location(player_id)
+        print("Location fetched from Redis: ", location)
+        print("Location fetched from Redis: ", location[0], location[1])
 
         # Create a dictionary with player details to send back as a response
         player_details = {
