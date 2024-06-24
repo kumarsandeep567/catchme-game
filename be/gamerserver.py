@@ -53,7 +53,7 @@ def app_settings():
     # Define how long an access token remains valid
     # By default, set to 900 seconds (which is 15 minutes)
     if 'access_token_expiration' not in g:
-        g['access_token_expiration'] = os.environ.get("ACCESS_TOKEN_EXPIRATION", 900)
+        g['access_token_expiration'] = os.environ.get("ACCESS_TOKEN_EXPIRATION", 0)
     
     # Similar to access_token_expiration, but for refresh tokens
     # Refresh tokens typically have a longer lifespan than access tokens
@@ -77,7 +77,9 @@ def app_settings():
 
         g['password_hashes'] = []
         for p in g['passwords']:
-            g['password_hashes'].append(bcrypt.generate_password_hash(p, 13).decode('utf-8'))
+            g['password_hashes'].append(
+                bcrypt.generate_password_hash(p, g['bcrypt_log_rounds']).decode('utf-8')
+            )
         print("g['password_hashes]=", g['password_hashes'])
 
         # Assign these users their user_id
@@ -146,12 +148,34 @@ def encode_token(user_id, token_type):
 def decode_token(token):
     
     # Decode the token (YES, it is 'algorithms' not 'algorithm')
-    payload = jwt.decode(
+    encoded_payload = jwt.decode(
         token, 
         read_app_settings("secret_key"), 
         algorithms = ["HS256"]
     )
-    return payload["subject"]
+
+    # Convert expiration_time to UTC string to help setting cookies in
+    # Javascript without any further convertion
+    expiration_time = datetime\
+                        .fromtimestamp(encoded_payload['expiration_time'], timezone.utc)\
+                        .strftime('%a, %d %b %Y %H:%M:%S UTC')
+    
+    # Do the same for issued_at
+    issued_at = datetime\
+                        .fromtimestamp(encoded_payload['issued_at'], timezone.utc)\
+                        .strftime('%a, %d %b %Y %H:%M:%S UTC')
+
+    decoded_payload = {
+        "expiration_time": expiration_time,
+        "issued_at": issued_at,
+        "subject": encoded_payload['user_id'],
+    }
+
+    return decoded_payload
+
+# Cookies
+def convert_seconds_to_days(seconds):
+    return (seconds // (24 * 3600))
 
 # ==========================================================
 # +++ Player Login Endpoint +++
@@ -198,7 +222,7 @@ def login():
                 user_id = read_app_settings('user_ids')[available_users.index(user)]
                 access_token = encode_token(user_id, "access")
                 refresh_token = encode_token(user_id, "refresh")
-                expiration_day = 1
+                expiration_time = decode_token(access_token)['expiration_time']
                 g['logged_userId'] = user_id
                 
                 # Prepare the tokens for serialization
@@ -206,7 +230,7 @@ def login():
                     "userId": user_id,
                     "access_token": access_token,
                     "refresh_token": refresh_token,
-                    "expiration_day": 1
+                    "expiration_time": expiration_time
                 }, HTTPStatus.OK)
 
         return jsonify(server_response)
