@@ -42,11 +42,22 @@ function GeoLocation(props) {
   const defaultHeight = 500;
 
   // Define the default latitude and longitude values
-  const defaultLaitude = 42.33528042187331;
+  const defaultLatitude = 42.33528042187331;
   const defaultLongitude = -71.09702787206938;
 
   // Set the default center for the map
-  const [center, setCenter] = useState([defaultLaitude, defaultLongitude]);
+  const [center, setCenter] = useState([defaultLatitude, defaultLongitude]);
+
+  // Read cookie and return the required value
+  const readCookie = (name) => {
+
+    // Each cookie has attributes separated by a ';'
+    const cookies = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(`${name}=`));
+   
+    return cookies ? cookies.split("=")[1] : null;
+   };
 
   // Report player location (and any other data)
   const reportPlayerLocation = async (userId, latitude, longitude) => {
@@ -61,8 +72,11 @@ function GeoLocation(props) {
     // Attempt to send the data to the Flask server
     try {
 
+      // Server address and port defined as env variables
+      const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
+
       // URL of the Flask application and the route
-      const URI = "http://localhost:5000/location";
+      const URI = server_address.concat("/location");
 
       // Define the necessary data, along with the player
       // data (as a JSON) to send to the Flask server. 
@@ -109,7 +123,11 @@ function GeoLocation(props) {
           setHea(position.coords.heading);
           setSpd(position.coords.speed);
           setCenter([position.coords.latitude, position.coords.longitude]);
-          reportPlayerLocation(1, position.coords.latitude, position.coords.longitude);
+          reportPlayerLocation(
+            readCookie('userId'), 
+            position.coords.latitude, 
+            position.coords.longitude
+          );
         },
         (e) => {
           console.log(e);
