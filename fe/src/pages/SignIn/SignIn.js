@@ -97,10 +97,10 @@ const useStyles = makeStyles((theme) => ({
 //  +++ Set cookies after successful SignIn +++
 //  ==========================================================
 
-const setCookie = (userId, accessToken, days) => {
-  const expirationDate = new Date();
-  expirationDate.setDate(expirationDate.getDate() + days);
-  document.cookie = `userId=${userId}; accessToken=${accessToken}; expires=${expirationDate.toUTCString()}; path=/`;
+const setCookie = (userId, accessToken, time) => {
+  console.log(time);
+  document.cookie = `userId=${userId}; expires=${time}; path=/`;
+  document.cookie = `accessToken=${accessToken}; expires=${time}; path=/`;
  };
 
 
@@ -147,15 +147,15 @@ const SignIn = () => {
         // console.log(data[0].userId);
         // console.log(data[0].access_token);
         // console.log(data[0].refresh_token);
-        setCookie(data[0].userId, data[0].access_token, data[0].expiration_day);
+        setCookie(data[0].userId, data[0].access_token, data[0].expiration_time);
         console.log('---');
         saveAuthorisation({
           access: data[0].access_token,
           refresh: data[0].refresh_token,
         });
 
-        // back to landing page!
-        history.push("/");
+        // Redirect to Geolocation page
+        history.push("/geolocation");
       })
       .catch( (err) => {
         alert(err);
