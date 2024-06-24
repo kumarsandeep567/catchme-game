@@ -23,10 +23,6 @@ import jwt
 from redis_trial import *
 from flask_socketio import SocketIO, emit
 
-# This variable will store the application settings and
-# made available globally (used by app_settings() method)
-g = dict()
-
 # Initialize the Flask application
 app = Flask(__name__)
 
@@ -39,19 +35,12 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # To use Bcrypt APIs, wrap the Flask app in Bcrypt()
 bcrypt = Bcrypt(app)
 
-# SocketIO instance
-socketio = SocketIO(app, cors_allowed_origins="*")
-
 # This variable will store the application settings and
 # made available globally (used by app_settings() method)
 g = dict()
 
 # List to track the broadcast receipents
 broadcast_receipents = dict()
-
-# SocketIO instance
-socketio = SocketIO(app, cors_allowed_origins="*")
-
 
 # ==========================================================
 # +++ Application settings +++
