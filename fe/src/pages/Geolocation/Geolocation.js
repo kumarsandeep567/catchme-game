@@ -62,7 +62,7 @@ function GeoLocation(props) {
     try {
 
       // URL of the Flask application and the route
-      const URI = "https://2ae1-155-33-133-19.ngrok-free.app/location";
+      const URI = `${process.env.REACT_APP_API_SERVICE_URL}/location`;
 
       // Define the necessary data, along with the player
       // data (as a JSON) to send to the Flask server. 
