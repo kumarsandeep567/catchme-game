@@ -149,11 +149,13 @@ def decode_token(token):
         algorithms = ["HS256"]
     )
 
+    expiration_time = 0
     # Convert expiration_time to UTC string to help setting cookies in
     # Javascript without any further convertion
-    expiration_time = datetime\
-                        .fromtimestamp(encoded_payload['expiration_time'], timezone.utc)\
-                        .strftime('%a, %d %b %Y %H:%M:%S UTC')
+    if read_app_settings('access_token_expiration'):
+        expiration_time = datetime\
+                            .fromtimestamp(encoded_payload['expiration_time'], timezone.utc)\
+                            .strftime('%a, %d %b %Y %H:%M:%S UTC')
     
     # Do the same for issued_at
     issued_at = datetime\
@@ -163,14 +165,10 @@ def decode_token(token):
     decoded_payload = {
         "expiration_time": expiration_time,
         "issued_at": issued_at,
-        "subject": encoded_payload['user_id'],
+        "subject": encoded_payload['subject'],
     }
 
     return decoded_payload
-
-# Cookies
-def convert_seconds_to_days(seconds):
-    return (seconds // (24 * 3600))
 
 # ==========================================================
 # +++ Player Login Endpoint +++
