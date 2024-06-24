@@ -9,8 +9,8 @@ import random
 import string
 from flask_bcrypt import Bcrypt
 import jwt
+from redis_trial import *
 from flask_socketio import SocketIO, emit
-
 
 # This variable will store the application settings and
 # made available globally (used by app_settings() method)
@@ -248,11 +248,15 @@ def get_player_location():
         print("Player Longitude is ", player_longitude)
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
+        store_user_location(player_id, player_latitude, player_longitude)
+
+        location = fetch_user_location(user_id)
+
         # Create a dictionary with player details to send back as a response
         player_details = {
             'player_id': player_id,
-            'player_latitude': player_latitude,
-            'player_longitude': player_longitude
+            'player_latitude': location[0],
+            'player_longitude': location[1]
         }
 
         # Return a HTTP 200 OK status with player details
@@ -278,8 +282,10 @@ def handle_connect():
     # location = r.get('user_location')
     # if location:
         # lat, lon = map(float, location.decode('utf-8').split(','))
+    user_id = g['logged_userId']
+    location = fetch_user_location(user_id)
     print('Client connected')
-    emit('location_update', {'userId': g['logged_userId'], 'lat':42.3385268, 'lon':-71.0875192})
+    emit('location_update', {'userId': user_id, 'lat':location[0], 'lon':location[1]})
     
 # ==========================================================
 # +++ App pre-run configuration +++
