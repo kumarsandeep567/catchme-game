@@ -282,8 +282,10 @@ def handle_connect():
     # location = r.get('user_location')
     # if location:
         # lat, lon = map(float, location.decode('utf-8').split(','))
+    user_id = g['logged_userId']
+    location = fetch_user_location(user_id)
     print('Client connected')
-    emit('location_update', {'userId': g['logged_userId'], 'lat':42.3385268, 'lon':-71.0875192})
+    emit('location_update', {'userId': user_id, 'lat':location[0], 'lon':location[1]})
     
 # ==========================================================
 # +++ App pre-run configuration +++
