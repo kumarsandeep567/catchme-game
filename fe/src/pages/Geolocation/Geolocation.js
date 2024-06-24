@@ -21,6 +21,13 @@ const styles = (theme) => ({
   },
 });
 
+// Define the colors for the map markers
+const markerColors = [
+  `rgb(208, 149, 208)`, // pink
+  `rgb(149, 208, 149)`, // green
+  `rgb(149, 188, 208)`  // blue
+];
+
 // Server address and port defined as env variables
 const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
 
@@ -30,8 +37,8 @@ const socket = io(server_address);
 function GeoLocation(props) {
 
   // Set initial values for Latitude, Longitude, Heading, and Speed
-  const [Lat, setLat] = useState(null);
-  const [Lon, setLng] = useState(null);
+  const [Lat, setLat] = useState('Fetching Location');
+  const [Lon, setLng] = useState('Fetching Location');
   const [Hea, setHea] = useState(null);
   const [Spd, setSpd] = useState(null);
   
@@ -39,7 +46,7 @@ function GeoLocation(props) {
   const [zoom, setZoom] = useState(18);
 
   // Define the default height 
-  const defaultHeight = 500;
+  const defaultHeight = 600;
 
   // Define the default latitude and longitude values
   const defaultLatitude = 42.33528042187331;
@@ -169,14 +176,17 @@ function GeoLocation(props) {
 
   return (
     <div style={{ backgroundColor: "white", padding: 72 }}>
-      <button onClick={updateLocation}>Get Location</button>
+      <br></br>
+
+      {/* Enable this button to update location manually */}
+      {/* <button onClick={updateLocation}>Get Location</button> */}
 
       {/* Some of these are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}
-      <p>Latitude: {Lat}</p>
-      <p>Longitude: {Lon}</p>
-      {null && Hea && <p>Heading: {Hea}</p>}
-      {null && Spd && <p>Speed: {Spd}</p>}
+      <h3>Latitude: {Lat}</h3>
+      <h3>Longitude: {Lon}</h3>
+      {null && Hea && <h3>Heading: {Hea}</h3>}
+      {null && Spd && <h3>Speed: {Spd}</h3>}
 
       {/* Render the map */}
       <h1>Map</h1>
@@ -197,6 +207,7 @@ function GeoLocation(props) {
           <Marker
             key={userId}
             width={50}
+            color={markerColors[userId]}
             anchor={[users[userId].latitude, users[userId].longitude]}
           />
         ))}
