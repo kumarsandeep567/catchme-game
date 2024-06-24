@@ -98,7 +98,6 @@ const useStyles = makeStyles((theme) => ({
 //  ==========================================================
 
 const setCookie = (userId, accessToken, time) => {
-  console.log(time);
   document.cookie = `userId=${userId}; expires=${time}; path=/`;
   document.cookie = `accessToken=${accessToken}; expires=${time}; path=/`;
  };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { withStyles } from "@material-ui/core/styles";
-import useGeolocation from "./useGeolocation";
 import io from "socket.io-client";
 
 const styles = (theme) => ({
@@ -29,12 +28,6 @@ const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
 const socket = io(server_address);
 
 function GeoLocation(props) {
-
-  // If location is allowed, fetch x,y co-ordinates returned by
-  // useEffect() hook in useGeolocation.js
-  const {
-    data: { latitude, longitude },
-  } = useGeolocation();
 
   // Set initial values for Latitude, Longitude, Heading, and Speed
   const [Lat, setLat] = useState(null);
@@ -179,10 +172,10 @@ function GeoLocation(props) {
       <p>Latitude: {Lat}</p>
       <p>Longitude: {Lon}</p>
 
-      {/* These are not used but defined above */}
+      {/* Some of these are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}
-      {null && Lat && <p>Latitude: {Lat}</p>}
-      {null && Lon && <p>Longitude: {Lon}</p>}
+      <p>Latitude: {Lat}</p>
+      <p>Longitude: {Lon}</p>
       {null && Hea && <p>Heading: {Hea}</p>}
       {null && Spd && <p>Speed: {Spd}</p>}
 
