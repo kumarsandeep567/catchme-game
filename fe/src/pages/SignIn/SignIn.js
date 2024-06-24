@@ -140,13 +140,6 @@ const SignIn = () => {
     fetch(`${process.env.REACT_APP_API_SERVICE_URL}/login`, config)
       .then(response => response.json())
       .then(data => {
-
-        // save to local storage
-        console.log("received these keys in return:")
-        console.log(data);
-        // console.log(data[0].userId);
-        // console.log(data[0].access_token);
-        // console.log(data[0].refresh_token);
         setCookie(data[0].userId, data[0].access_token, data[0].expiration_time);
         console.log('---');
         saveAuthorisation({

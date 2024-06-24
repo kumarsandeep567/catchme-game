@@ -149,7 +149,9 @@ def decode_token(token):
         algorithms = ["HS256"]
     )
 
+    # If access_token_expiration is 0, convert the cookie to a session cookie
     expiration_time = 0
+
     # Convert expiration_time to UTC string to help setting cookies in
     # Javascript without any further convertion
     if read_app_settings('access_token_expiration'):
