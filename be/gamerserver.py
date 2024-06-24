@@ -260,9 +260,12 @@ def get_player_location():
         player_longitude = request.json['lon']
 
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
+        
+        # Disabling the print() statements temporarily
         # print("Player ID is ", player_id)
         # print("Player Latitude is ", player_latitude)
         # print("Player Longitude is ", player_longitude)
+        
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
         # Create a dictionary with player details to send back as a response
