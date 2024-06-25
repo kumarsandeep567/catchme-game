@@ -9,7 +9,7 @@ import random
 import string
 from flask_bcrypt import Bcrypt
 import jwt
-from redis_trial import *
+from redis_lib import *
 from flask_socketio import SocketIO, emit
 
 # This variable will store the application settings and
@@ -38,6 +38,37 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 def app_settings():
     global g
+
+    # User data
+    user_id = 1001
+    username = "John Cena"
+    password = "john"
+    status = "inactive"
+    latitude = "37.7749"
+    longitude = "-79.5555"
+
+    # Store user location
+    store_user_location(user_id, username, password, status, latitude ,longitude)
+
+    # User data
+    user_id = 1002
+    username = "Randy Orton"
+    password = "randy"
+    status = "inactive"
+    latitude = "35.89"
+    longitude = "-54.4194"
+
+    # Store user location
+    store_user_location(user_id, username, password, status, latitude ,longitude)
+
+    # User data
+    user_id = 1003
+    username = "Rey Misterio"
+    password = "rey"
+    status = "inactive"
+    latitude = "35.89"
+    longitude = "-54.4194"
+    store_user_location(user_id, username, password, status, latitude ,longitude)
 
     # This key will be used when encoding and decoding the 
     # access tokens
@@ -162,15 +193,24 @@ def decode_token(token):
 @cross_origin()
 def login():
     try:
-        user = request.json['name']
+        print("getting user details from request object..")
+        user_name = request.json['name']
+        print("got user_name ", user_name)
         password = request.json['password']
+        print("got password ", password)
 
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
         # Get all users setup by app_settings()
-        available_users = read_app_settings('users')
+        #old code
+        # available_users = read_app_settings('users')
 
-        if user not in available_users:
+        #getting user credentials using redis
+        print("getting user details... ")
+        user = get_user_credentials(user_name)
+        print("outside if: ", user)
+
+        if user[1] == "":
 
             # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
             print('Unknown user trying to login ...')
@@ -182,11 +222,15 @@ def login():
         else:
 
             # Get the user's hashed password from app_settings()
-            password_hash = read_app_settings('password_hashes')[available_users.index(user)]
+            password_hash = user[2]
+            print("within else condition",user[2])
+            # password_hash = read_app_settings('password_hashes')[available_users.index(user)]
 
             # Hash the user provided password and compare it with
             # password_hash
-            if not bcrypt.check_password_hash(password_hash, password):
+            # if not bcrypt.check_password_hash(password_hash, password):
+            if password != password_hash:
+                print("within else-if condition ",user[2])
 
                 # Wrong password
                 server_response = (
@@ -195,11 +239,18 @@ def login():
                 )
             else:
                 # Create the tokens for the user
-                user_id = read_app_settings('user_ids')[available_users.index(user)]
+                # user_id = read_app_settings('user_ids')[available_users.index(user)]
+                user_id = user[0]
                 access_token = encode_token(user_id, "access")
+                print("else: access token ", access_token)
                 refresh_token = encode_token(user_id, "refresh")
                 expiration_day = 1
                 g['logged_userId'] = user_id
+                
+                user_data = fetch_user_data(user_id)
+                user_data[2] = "active"
+
+                update_user(user_id, user_data)
                 
                 # Prepare the tokens for serialization
                 server_response = ({
@@ -239,7 +290,7 @@ def get_player_location():
         socketio.emit('location_update', data)
         
         # Try getting the player details from the query parameters
-        player_id = request.json['id']
+        player_id = user_id
         player_latitude = request.json['lat']
         player_longitude = request.json['lon']
 
@@ -249,15 +300,18 @@ def get_player_location():
         print("Player Longitude is ", player_longitude)
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
-        store_user_location(player_id, player_latitude, player_longitude)
+        #debug
+        print("before update location: ", player_id, player_latitude, player_longitude)
+        #update the user's current location
+        update_location(player_id, player_latitude, player_longitude)
 
-        location = fetch_user_location(user_id)
+        print("update location")
 
         # Create a dictionary with player details to send back as a response
         player_details = {
             'player_id': player_id,
-            'player_latitude': location[0],
-            'player_longitude': location[1]
+            'player_latitude': player_latitude,
+            'player_longitude': player_longitude
         }
 
         # Return a HTTP 200 OK status with player details
@@ -280,14 +334,18 @@ def get_player_location():
 
 @socketio.on('connect')
 def handle_connect():
-    # location = r.get('user_location')
-    # if location:
-        # lat, lon = map(float, location.decode('utf-8').split(','))
-    user_id = g['logged_userId']
-    location = fetch_user_location(user_id)
     print('Client connected')
-    emit('location_update', {'userId': user_id, 'lat':location[0], 'lon':location[1]})
-    
+
+# @socketio.on('connect')
+# def handle_connect():
+#     # location = r.get('user_location')
+#     # if location:
+#         # lat, lon = map(float, location.decode('utf-8').split(','))
+#     user_id = g['logged_userId']
+#     location = fetch_user_location(user_id)
+#     print('Client connected')
+#     emit('location_update', {'userId': user_id, 'lat':location[0], 'lon':location[1]})
+
 # ==========================================================
 # +++ App pre-run configuration +++
 # ==========================================================
