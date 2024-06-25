@@ -237,7 +237,7 @@ function GeoLocation(props) {
       {tooltip.visible && (
         <div
           style={{
-            position: 'absolute',
+            position: 'relative',
             backgroundColor: 'white',
             padding: '5px',
             border: '1px solid black',
