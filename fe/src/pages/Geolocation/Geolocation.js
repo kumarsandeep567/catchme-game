@@ -58,14 +58,6 @@ function GeoLocation(props) {
   // Set default active users 
   const [users, setUsers] = useState({});
 
-  // Default state for marker tooltips
-  const [tooltip, setTooltip] = useState({ 
-    visible: false, 
-    userId: null, 
-    latitude: null, 
-    longitude: null 
-  });
-
   // Read cookie and return the required value
   const readCookie = (name) => {
 
@@ -185,14 +177,6 @@ function GeoLocation(props) {
     };
   }, []);
 
-  const handleMouseOver = (userId, latitude, longitude) => {
-    setTooltip({ visible: true, userId, latitude, longitude });
-  };
-
-  const handleMouseOut = () => {
-    setTooltip({ visible: false, userId: null, latitude: null, longitude: null });
-  };
-
   return (
     <div style={{ backgroundColor: "white", padding: 72 }}>
       <br></br>
@@ -202,8 +186,6 @@ function GeoLocation(props) {
 
       {/* Some of these are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}
-      <h2>
-        Player {readCookie('userId').concat("'s coordinates")}</h2>
       <h3>Latitude: {Lat}</h3>
       <h3>Longitude: {Lon}</h3>
       {null && Hea && <h3>Heading: {Hea}</h3>}
@@ -222,38 +204,20 @@ function GeoLocation(props) {
           setZoom(zoom);
         }}
       >
-        {/* Dynamically add markers to represent players on the map */}
+        {/* Added 3 markers to represent 3 players on the map */}
+        
         {Object.keys(users).map((userId) => (
           <Marker
             key={userId}
             width={50}
             color={markerColors[userId]}
             anchor={[users[userId].latitude, users[userId].longitude]}
-            onMouseOver={() => handleMouseOver(userId, users[userId].latitude, users[userId].longitude)}
-            onMouseOut={handleMouseOut}
           />
         ))}
 
         {/* Add default +/- buttons to allow zoom controls on the map */}
         <ZoomControl />
       </Map>
-      {tooltip.visible && (
-        <div
-          style={{
-            position: 'relative',
-            backgroundColor: 'white',
-            padding: '5px',
-            border: '1px solid black',
-            borderRadius: '3px',
-            top: '10px',
-            left: '10px',
-          }}
-        >
-          <p>User ID: {tooltip.userId}</p>
-          <p>Latitude: {tooltip.latitude}</p>
-          <p>Longitude: {tooltip.longitude}</p>
-        </div>
-      )}
     </div>
   );
 }
