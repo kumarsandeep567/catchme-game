@@ -19,9 +19,7 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import MapIcon from '@material-ui/icons/Map';
-import CreateIcon from '@material-ui/icons/Create';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import ChatIcon from '@material-ui/icons/Chat';
 
 // import Badge from '@material-ui/core/Badge';
 // import NotificationsIcon from '@material-ui/icons/Notifications';
@@ -33,8 +31,6 @@ import SignUp from "../pages/SignUp/SignUp";
 import SignIn from "../pages/SignIn/SignIn";
 import PasswordReset from "../pages/PasswordReset/PasswordReset";
 import PasswordChange from "../pages/PasswordChange/PasswordChange";
-import THome from "../pages/Tweets/Home";
-import Compose from "../pages/Compose/Compose";
 import Geolocation from "../pages/Geolocation/Geolocation";
 
 const drawerWidth = 240;
@@ -141,9 +137,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-//~dk
-// const isAuthorised = config.auth.isAuthenticated()
-
 export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
@@ -230,24 +223,6 @@ export default function Dashboard() {
               { title === 'Geolocation' }
             </ListItem>
 
-            {/* Tweets menu item*/}
-            <ListItem button component={Link} to="/tweets" onClick={onItemClick('Tweets')}>
-              <ListItemIcon>
-                <ChatIcon />
-              </ListItemIcon>
-              <ListItemText primary="Tweets" />
-              { title === 'Tweets' }
-            </ListItem>
-
-            {/* Compose menu item*/}
-            <ListItem button component={Link} to="/compose" onClick={onItemClick('Compose')}>
-              <ListItemIcon>
-                <CreateIcon />
-              </ListItemIcon>
-              <ListItemText primary="Compose" />
-              { title === 'Compose' }
-            </ListItem>
-
             {/* SignUp menu item */}
             <ListItem button component={Link} to="/signin" onClick={onItemClick('Sign In')}>
               <ListItemIcon>
@@ -264,14 +239,11 @@ export default function Dashboard() {
 
           {/* menu paths */}
           <Route exact path="/" component={Home} />
-          <Route path="/tweets" component={THome} />
-          <Route path="/compose" component={Compose} />
           <Route path="/signin" component={SignIn} />
           <Route path="/signup" component={SignUp} />
           <Route path="/password_reset" component={PasswordReset} />
           <Route path="/password_change" component={PasswordChange} />
           <Route path="/geolocation" component={Geolocation} />
-          {/* <Route path="/activity"><ActivityHome /></Route> */}
         </main>
       </Router>
       
