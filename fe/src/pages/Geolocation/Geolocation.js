@@ -58,6 +58,10 @@ function GeoLocation(props) {
   // Set default active users 
   const [users, setUsers] = useState({});
 
+  // Default value (in milliseconds) for updateLocation 
+  // interval (1 second = 1000 ms)
+  const updateDuration = 3000;
+
   // Default state for marker tooltips
   const [tooltip, setTooltip] = useState({ 
     visible: false, 
@@ -133,11 +137,17 @@ function GeoLocation(props) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          
+          // Set the Latitude, Longitude, Heading, and Speed 
           setLat(position.coords.latitude);
           setLng(position.coords.longitude);
           setHea(position.coords.heading);
           setSpd(position.coords.speed);
+
+          // Re-center the map based on the current latitude and longitude
           setCenter([position.coords.latitude, position.coords.longitude]);
+
+          // Notify the Flask application of changes in user's coordinates
           reportPlayerLocation(
             readCookie('userId'), 
             position.coords.latitude, 
@@ -154,13 +164,12 @@ function GeoLocation(props) {
     console.log("Updating postition now...")
   }, [reportPlayerLocation]);
 
-  // UseEffect hook to update location every 10 seconds
+  // UseEffect hook to update location every 'x' seconds
   useEffect(() => {
 
     // Define the interval to update the players location
     // Since the location fetching is handled by the updateLocation()
-    // call the method every 10 seconds (10 seconds = 10000 ms)
-    const interval = setInterval(updateLocation, 10000);
+    const interval = setInterval(updateLocation, updateDuration);
 
     // Clear interval on component unmount
     return () => clearInterval(interval);
@@ -182,12 +191,25 @@ function GeoLocation(props) {
     };
   }, []);
 
-  const handleMouseOver = (userId, latitude, longitude) => {
-    setTooltip({ visible: true, userId, latitude, longitude });
+
+  // Show the tooltip when the user hovers over a map marker
+  const mouseHoverActiveHandler = (userId, latitude, longitude) => {
+    setTooltip({ 
+      visible: true, 
+      userId, 
+      latitude, 
+      longitude 
+    });
   };
 
-  const handleMouseOut = () => {
-    setTooltip({ visible: false, userId: null, latitude: null, longitude: null });
+  // Hide the tooltip when the user no longer hovers over a map marker
+  const mouseHoverInactiveHandler = () => {
+    setTooltip({ 
+      visible: false, 
+      userId: null, 
+      latitude: null, 
+      longitude: null 
+    });
   };
 
   return (
@@ -197,12 +219,17 @@ function GeoLocation(props) {
       {/* Enable this button to update location manually */}
       {/* <button onClick={updateLocation}>Get Location</button> */}
 
-      {/* Some of these are not used but defined above */}
-      {/* 'AND' these values with 'null' for now to hide them */}
       <h2>
         Player {readCookie('userId').concat("'s coordinates")}</h2>
-      <h3>Latitude: {Lat}</h3>
-      <h3>Longitude: {Lon}</h3>
+      <h3>
+        Latitude: {Lat}
+      </h3>
+      <h3>
+        Longitude: {Lon}
+      </h3>
+
+      {/* Some of these are not used but defined above */}
+      {/* 'AND' these values with 'null' for now to hide them */}
       {null && Hea && <h3>Heading: {Hea}</h3>}
       {null && Spd && <h3>Speed: {Spd}</h3>}
 
@@ -219,6 +246,13 @@ function GeoLocation(props) {
           setZoom(zoom);
         }}
       >
+        {/* 
+          CAUTION: If the Flask application is put behind ngrok, socket 
+          connections do not work for some reason. When this happens,
+          Object.keys() will have null values and no marker will be 
+          placed on the map.
+        */}
+
         {/* Dynamically add markers to represent players on the map */}
         {Object.keys(users).map((userId) => (
           <Marker
@@ -226,14 +260,22 @@ function GeoLocation(props) {
             width={50}
             color={markerColors[userId]}
             anchor={[users[userId].latitude, users[userId].longitude]}
-            onMouseOver={() => handleMouseOver(userId, users[userId].latitude, users[userId].longitude)}
-            onMouseOut={handleMouseOut}
+            onMouseOver={
+              () => mouseHoverActiveHandler(
+                userId, 
+                users[userId].latitude, 
+                users[userId].longitude
+              )
+            }
+            onMouseOut={mouseHoverInactiveHandler}
           />
         ))}
 
         {/* Add default +/- buttons to allow zoom controls on the map */}
         <ZoomControl />
       </Map>
+
+      {/* Styling and content of the tooltips */}
       {tooltip.visible && (
         <div
           style={{
