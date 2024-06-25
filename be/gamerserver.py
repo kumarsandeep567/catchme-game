@@ -1,20 +1,13 @@
 import os
 import jwt
 from http import HTTPStatus
-from flask_bcrypt import Bcrypt
 from flask import Flask, request, jsonify
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
-import os
-import json
-import random
-import string
-from flask_bcrypt import Bcrypt
-import jwt
 from redis_lib import *
-from flask_socketio import SocketIO, emit
 
 # This variable will store the application settings and
 # made available globally (used by app_settings() method)
