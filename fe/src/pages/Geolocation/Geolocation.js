@@ -218,6 +218,23 @@ function GeoLocation(props) {
         {/* Add default +/- buttons to allow zoom controls on the map */}
         <ZoomControl />
       </Map>
+      {tooltip.visible && (
+        <div
+          style={{
+            position: 'absolute',
+            backgroundColor: 'white',
+            padding: '5px',
+            border: '1px solid black',
+            borderRadius: '3px',
+            top: '10px',
+            left: '10px',
+          }}
+        >
+          <p>User ID: {tooltip.userId}</p>
+          <p>Latitude: {tooltip.latitude}</p>
+          <p>Longitude: {tooltip.longitude}</p>
+        </div>
+      )}
     </div>
   );
 }
