@@ -58,6 +58,14 @@ function GeoLocation(props) {
   // Set default active users 
   const [users, setUsers] = useState({});
 
+  // Default state for marker tooltips
+  const [tooltip, setTooltip] = useState({ 
+    visible: false, 
+    userId: null, 
+    latitude: null, 
+    longitude: null 
+  });
+
   // Read cookie and return the required value
   const readCookie = (name) => {
 
@@ -92,7 +100,6 @@ function GeoLocation(props) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify(requestFields)
       }
@@ -113,8 +120,6 @@ function GeoLocation(props) {
           alert("Error occured in responseData!");
           console.error(error);
         }
-      }else{
-        console.log(response)
       }
     } catch (error) {
       alert("Error occurred in reportPlayerLocation!");
@@ -149,8 +154,8 @@ function GeoLocation(props) {
     console.log("Updating postition now...")
   }, [reportPlayerLocation]);
 
-   // UseEffect hook to update location every 10 seconds
-   useEffect(() => {
+  // UseEffect hook to update location every 10 seconds
+  useEffect(() => {
 
     // Define the interval to update the players location
     // Since the location fetching is handled by the updateLocation()
@@ -177,6 +182,14 @@ function GeoLocation(props) {
     };
   }, []);
 
+  const handleMouseOver = (userId, latitude, longitude) => {
+    setTooltip({ visible: true, userId, latitude, longitude });
+  };
+
+  const handleMouseOut = () => {
+    setTooltip({ visible: false, userId: null, latitude: null, longitude: null });
+  };
+
   return (
     <div style={{ backgroundColor: "white", padding: 72 }}>
       <br></br>
@@ -186,6 +199,8 @@ function GeoLocation(props) {
 
       {/* Some of these are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}
+      <h2>
+        Player {readCookie('userId').concat("'s coordinates")}</h2>
       <h3>Latitude: {Lat}</h3>
       <h3>Longitude: {Lon}</h3>
       {null && Hea && <h3>Heading: {Hea}</h3>}
@@ -204,14 +219,15 @@ function GeoLocation(props) {
           setZoom(zoom);
         }}
       >
-        {/* Added 3 markers to represent 3 players on the map */}
-        
+        {/* Dynamically add markers to represent players on the map */}
         {Object.keys(users).map((userId) => (
           <Marker
             key={userId}
             width={50}
             color={markerColors[userId]}
             anchor={[users[userId].latitude, users[userId].longitude]}
+            onMouseOver={() => handleMouseOver(userId, users[userId].latitude, users[userId].longitude)}
+            onMouseOut={handleMouseOut}
           />
         ))}
 
