@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { withStyles } from "@material-ui/core/styles";
 import io from "socket.io-client";
@@ -34,9 +35,24 @@ const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
 // Establish websocket connection with Flask application
 const socket = io(server_address);
 
+// Define the colors for the map markers
+const markerColors = [
+  `rgb(208, 149, 208)`, // pink
+  `rgb(149, 208, 149)`, // green
+  `rgb(149, 188, 208)`  // blue
+];
+
+// Server address and port defined as env variables
+const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
+
+// Establish websocket connection with Flask application
+const socket = io(server_address);
+
 function GeoLocation(props) {
 
   // Set initial values for Latitude, Longitude, Heading, and Speed
+  const [Lat, setLat] = useState('Fetching Location');
+  const [Lon, setLng] = useState('Fetching Location');
   const [Lat, setLat] = useState('Fetching Location');
   const [Lon, setLng] = useState('Fetching Location');
   const [Hea, setHea] = useState(null);
@@ -47,8 +63,10 @@ function GeoLocation(props) {
 
   // Define the default height 
   const defaultHeight = 600;
+  const defaultHeight = 600;
 
   // Define the default latitude and longitude values
+  const defaultLatitude = 42.33528042187331;
   const defaultLatitude = 42.33528042187331;
   const defaultLongitude = -71.09702787206938;
 
@@ -79,6 +97,7 @@ function GeoLocation(props) {
 
   // Report player location (and any other data)
   const reportPlayerLocation = useCallback((userId, latitude, longitude) => {
+  const reportPlayerLocation = useCallback((userId, latitude, longitude) => {
 
     // Organize the data to send in a dictionary
     const requestFields = {
@@ -92,6 +111,7 @@ function GeoLocation(props) {
 
       // URL of the Flask application and the route
       const URI = server_address.concat("/location");
+      const URI = server_address.concat("/location");
 
       // Define the necessary data, along with the player
       // data (as a JSON) to send to the Flask server. 
@@ -100,12 +120,15 @@ function GeoLocation(props) {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
         },
+        body: JSON.stringify(requestFields)
         body: JSON.stringify(requestFields)
       }
 
       // Send the player details and wait for a response 
       // (using async await)
+      const response = fetch(URI, requestConfiguration);
       const response = fetch(URI, requestConfiguration);
 
       // Check if response received is HTTP 200 OK
@@ -114,6 +137,7 @@ function GeoLocation(props) {
 
         // Try decoding the response data
         try{
+          const responseData = response.json();
           const responseData = response.json();
           console.log(responseData);
         } catch (error) {
@@ -127,8 +151,10 @@ function GeoLocation(props) {
     }
     
   }, []);
+  }, []);
 
   // Function to update the location and report changes to Flask server
+  const updateLocation = useCallback(() => {
   const updateLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -143,6 +169,11 @@ function GeoLocation(props) {
             position.coords.latitude, 
             position.coords.longitude
           );
+          reportPlayerLocation(
+            readCookie('userId'), 
+            position.coords.latitude, 
+            position.coords.longitude
+          );
         },
         (e) => {
           console.log(e);
@@ -152,6 +183,7 @@ function GeoLocation(props) {
       console.log("GeoLocation not supported by your browser!");
     }
     console.log("Updating postition now...")
+  }, [reportPlayerLocation]);
   }, [reportPlayerLocation]);
 
   // UseEffect hook to update location every 10 seconds
@@ -176,7 +208,23 @@ function GeoLocation(props) {
       setUsers(data);
     });
 
+    // Clear interval on component unmount
+    return () => clearInterval(interval);
+  }, [updateLocation]);
+
+  // UseEffect hook to broacast location
+  useEffect(() => {
+    socket.on('location_update', (data) => {
+      setUsers((prevUsers) => ({ ...prevUsers, ...data }));
+    });
+
+    socket.on('all_users', (data) => {
+      setUsers(data);
+    });
+
     return () => {
+      socket.off('location_update');
+      socket.off('all_users');
       socket.off('location_update');
       socket.off('all_users');
     };
@@ -196,7 +244,12 @@ function GeoLocation(props) {
 
       {/* Enable this button to update location manually */}
       {/* <button onClick={updateLocation}>Get Location</button> */}
+      <br></br>
 
+      {/* Enable this button to update location manually */}
+      {/* <button onClick={updateLocation}>Get Location</button> */}
+
+      {/* Some of these are not used but defined above */}
       {/* Some of these are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}
       <h2>
