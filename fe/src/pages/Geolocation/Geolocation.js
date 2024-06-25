@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Map, Marker, ZoomControl } from "pigeon-maps";
+import { Map, Marker, ZoomControl, Overlay } from "pigeon-maps";
 import { withStyles } from "@material-ui/core/styles";
 import io from "socket.io-client";
 
@@ -25,7 +25,7 @@ const styles = (theme) => ({
 const markerColors = [
   `rgb(208, 149, 208)`, // pink
   `rgb(149, 208, 149)`, // green
-  `rgb(149, 188, 208)`  // blue
+  `rgb(149, 188, 208)`, // blue
 ];
 
 // Server address and port defined as env variables
@@ -35,17 +35,16 @@ const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
 const socket = io(server_address);
 
 function GeoLocation(props) {
-
   // Set initial values for Latitude, Longitude, Heading, and Speed
-  const [Lat, setLat] = useState('Fetching Location');
-  const [Lon, setLng] = useState('Fetching Location');
+  const [Lat, setLat] = useState("Fetching Location");
+  const [Lon, setLng] = useState("Fetching Location");
   const [Hea, setHea] = useState(null);
   const [Spd, setSpd] = useState(null);
-  
+
   // Define the default zoom level
   const [zoom, setZoom] = useState(18);
 
-  // Define the default height 
+  // Define the default height
   const defaultHeight = 600;
 
   // Define the default latitude and longitude values
@@ -55,49 +54,46 @@ function GeoLocation(props) {
   // Set the default center for the map
   const [center, setCenter] = useState([defaultLatitude, defaultLongitude]);
 
-  // Set default active users 
+  // Set default active users
   const [users, setUsers] = useState({});
 
   // Read cookie and return the required value
   const readCookie = (name) => {
-
     // Each cookie has attributes separated by a ';'
     const cookies = document.cookie
       .split("; ")
       .find((row) => row.startsWith(`${name}=`));
-   
+
     return cookies ? cookies.split("=")[1] : null;
-   };
+  };
 
   // Report player location (and any other data)
   const reportPlayerLocation = useCallback((userId, latitude, longitude) => {
-
     // Organize the data to send in a dictionary
     const requestFields = {
-      'id': userId,
-      'lat': latitude,
-      'lon': longitude
-    }
+      id: userId,
+      lat: latitude,
+      lon: longitude,
+    };
 
     // Attempt to send the data to the Flask server
     try {
-
       // URL of the Flask application and the route
       const URI = server_address.concat("/location");
 
       // Define the necessary data, along with the player
-      // data (as a JSON) to send to the Flask server. 
+      // data (as a JSON) to send to the Flask server.
       const requestConfiguration = {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
-        body: JSON.stringify(requestFields)
-      }
+        body: JSON.stringify(requestFields),
+      };
 
-      // Send the player details and wait for a response 
+      // Send the player details and wait for a response
       // (using async await)
       const response = fetch(URI, requestConfiguration);
 
@@ -106,21 +102,20 @@ function GeoLocation(props) {
         console.log("Server responded!");
 
         // Try decoding the response data
-        try{
+        try {
           const responseData = response.json();
           console.log(responseData);
         } catch (error) {
           alert("Error occured in responseData!");
           console.error(error);
         }
-      }else{
-        console.log(response)
+      } else {
+        console.log(response);
       }
     } catch (error) {
       alert("Error occurred in reportPlayerLocation!");
       console.error(error);
     }
-    
   }, []);
 
   // Function to update the location and report changes to Flask server
@@ -134,8 +129,8 @@ function GeoLocation(props) {
           setSpd(position.coords.speed);
           setCenter([position.coords.latitude, position.coords.longitude]);
           reportPlayerLocation(
-            readCookie('userId'), 
-            position.coords.latitude, 
+            readCookie("userId"),
+            position.coords.latitude,
             position.coords.longitude
           );
         },
@@ -146,12 +141,11 @@ function GeoLocation(props) {
     } else {
       console.log("GeoLocation not supported by your browser!");
     }
-    console.log("Updating postition now...")
+    console.log("Updating postition now...");
   }, [reportPlayerLocation]);
 
-   // UseEffect hook to update location every 10 seconds
-   useEffect(() => {
-
+  // UseEffect hook to update location every 10 seconds
+  useEffect(() => {
     // Define the interval to update the players location
     // Since the location fetching is handled by the updateLocation()
     // call the method every 10 seconds (10 seconds = 10000 ms)
@@ -163,17 +157,17 @@ function GeoLocation(props) {
 
   // UseEffect hook to broacast location
   useEffect(() => {
-    socket.on('location_update', (data) => {
+    socket.on("location_update", (data) => {
       setUsers((prevUsers) => ({ ...prevUsers, ...data }));
     });
 
-    socket.on('all_users', (data) => {
+    socket.on("all_users", (data) => {
       setUsers(data);
     });
 
     return () => {
-      socket.off('location_update');
-      socket.off('all_users');
+      socket.off("location_update");
+      socket.off("all_users");
     };
   }, []);
 
@@ -197,7 +191,6 @@ function GeoLocation(props) {
         height={defaultHeight}
         center={center}
         defaultZoom={zoom}
-        
         // Recenter the map and apply the zoom values
         onBoundsChanged={({ center, zoom }) => {
           setCenter(center);
@@ -205,14 +198,11 @@ function GeoLocation(props) {
         }}
       >
         {/* Added 3 markers to represent 3 players on the map */}
-        
+
         {Object.keys(users).map((userId) => (
-          <Marker
-            key={userId}
-            width={50}
-            color={markerColors[userId]}
-            anchor={[users[userId].latitude, users[userId].longitude]}
-          />
+          <Overlay anchor={[users[userId].latitude, users[userId].longitude]}>
+            <img src="policeman.svg" width={40} height={58} alt="" />
+          </Overlay>
         ))}
 
         {/* Add default +/- buttons to allow zoom controls on the map */}
