@@ -34,17 +34,6 @@ function getAuthorisation() {
       // No web storage Support :-(
   }
 }
-function logout() {
-  if (typeof Storage !== 'undefined') {
-    try {
-        localStorage.removeItem(localStorageAuthKey);
-    } catch (ex) {
-        console.log(ex);
-    }
-  } else {
-      // No web storage Support :-(
-  }
-}
 
 
 const useStyles = makeStyles((theme) => ({
@@ -144,33 +133,10 @@ const SignIn = () => {
       });
   }
 
-  // Logout attempt
-  const handleSignOut = () => { 
-    logout();
-
-    // back to landing page!
-    history.push("/signin");
-  }
-
-
   return (
     <React.Fragment>
       <Paper className={classes.paper} elevation={6}>
         <div className={classes.container}>
-          <Typography component="h1" variant="h5" className={classes.padding}>
-            {'Sign Out'}
-          </Typography> 
-          <Typography gutterBottom>If you are not the only one on this device.</Typography>
-          <Button 
-            fullWidth 
-            variant="contained" 
-            margin="normal" 
-            color="secondary" 
-            onClick={handleSignOut} 
-            className={classes.buttonPadding}
-          >
-            {'Sign Out'}
-          </Button>
 
           <Typography component="h1" variant="h5">
             {'Sign In'}
