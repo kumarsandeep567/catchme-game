@@ -101,7 +101,7 @@ export default function Dashboard() {
   const pathname = window.location.pathname;
   const trimmedPath = pathname.substring(1);
   const capitalizedPath = trimmedPath.charAt(0).toUpperCase() + trimmedPath.slice(1);
-  const [title, setTitle] = React.useState("Landing page",capitalizedPath);
+  const [title, setTitle] = React.useState(capitalizedPath);
 
   // Default states for checking whether user is signed in or not
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -129,12 +129,23 @@ export default function Dashboard() {
 
   // Sign out handler
   const handleSignOut = () => {
-    // Delete the userId cookie
+
+    // Delete the userId and accessToken cookies
     const userIdCookie = readCookie('userId');
     const accessTokenCookie = readCookie('accessToken');
     document.cookie = `userId=${userIdCookie}; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
     document.cookie = `accessToken=${accessTokenCookie}; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    
+    // Set state as logged out
     setIsSignedIn(false);
+
+    // Redirect to sign-in page
+    history.push('/signin');
+
+    // Since cookies are still visible, force page reload
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   return (

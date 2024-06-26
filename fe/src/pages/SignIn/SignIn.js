@@ -126,6 +126,11 @@ const SignIn = () => {
 
         // Redirect to Geolocation page
         history.push("/geolocation");
+
+        // Force page reload to force App bar refresh its contents
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       })
       .catch( (err) => {
         alert(err);
