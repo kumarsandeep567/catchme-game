@@ -28,6 +28,12 @@ const markerColors = [
   `rgb(149, 188, 208)`  // blue
 ];
 
+const markerColors2 = {
+  'Cop':`rgb(255, 0, 0)`, // red
+  'Mafia':`rgb(149, 188, 208)`  // blue
+};
+
+
 // Server address and port defined as env variables
 const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
 
@@ -270,7 +276,7 @@ function GeoLocation(props) {
           <Marker
             key={userId}
             width={50}
-            color={markerColors[userId]}
+            color={markerColors2[users[userId].role]}
             anchor={[users[userId].latitude, users[userId].longitude]}
             onMouseOver={
               () => mouseHoverActiveHandler(
