@@ -231,6 +231,14 @@ function GeoLocation(props) {
 
       {/* Enable this button to update location manually */}
       {/* <button onClick={updateLocation}>Get Location</button> */}
+      <h2>
+        Player {readCookie('userId').concat("'s coordinates")}</h2>
+      <h3>
+        Latitude: {Lat}
+      </h3>
+      <h3>
+        Longitude: {Lon}
+      </h3>
 
       {/* Some of these are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}

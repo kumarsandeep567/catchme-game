@@ -341,12 +341,6 @@ def get_player_location():
             'longitude': player_longitude
         }
 
-        broadcast_receipents[player_id] = {
-            'latitude': player_latitude,
-            'longitude': player_longitude
-        }
-
-
         # Broadcast logged-in user's location to all connected users
         socketio.emit(
             'location_update', 
