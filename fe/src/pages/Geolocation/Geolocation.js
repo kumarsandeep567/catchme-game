@@ -82,11 +82,12 @@ function GeoLocation(props) {
    };
 
   // Report player location (and any other data)
-  const reportPlayerLocation = useCallback((userId, latitude, longitude) => {
+  const reportPlayerLocation = useCallback((userId, role, latitude, longitude) => {
 
     // Organize the data to send in a dictionary
     const requestFields = {
       'id': userId,
+      'role': role,
       'lat': latitude,
       'lon': longitude
     }
@@ -149,6 +150,7 @@ function GeoLocation(props) {
           setCenter([position.coords.latitude, position.coords.longitude]);
           reportPlayerLocation(
             readCookie('userId'), 
+            readCookie('role'),
             position.coords.latitude, 
             position.coords.longitude
           );
@@ -197,8 +199,6 @@ function GeoLocation(props) {
     });
 
     return () => {
-      socket.off('location_update');
-      socket.off('all_users');
       socket.off('location_update');
       socket.off('all_users');
     };

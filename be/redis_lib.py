@@ -3,7 +3,7 @@ import redis
 # Connect to Redis
 client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 
-def store_user_location(user_id, username, password, status, latitude, longitude):
+def store_user_location(user_id, username, password, status, latitude, longitude, role):
     """
     Store the user's location as a list in Redis.
 
@@ -13,7 +13,7 @@ def store_user_location(user_id, username, password, status, latitude, longitude
         longitude (float): The user's longitude.
     """
     # List of user data
-    user_data = [username, password, status, latitude, longitude]
+    user_data = [username, password, status, latitude, longitude, role]
     key = f"users:{user_id}"
     client.delete(key)
     client.rpush(key, *user_data)
@@ -30,6 +30,7 @@ def fetch_user_data(user_id):
     """
     key = f"users:{user_id}"
     data = client.lrange(key, 0, -1)
+    print("Len of data", len(data))
     return data
 
 def get_active_users():
@@ -103,7 +104,7 @@ def delete_user(user_id):
 
 def update_user(user_id, user_data):
     """
-    deletes a user with a particular user_id
+    updates a user with a particular user_id
     """
     cursor = '0'
 
@@ -131,13 +132,16 @@ def get_user_credentials(user_name):
     print(user_credentials)
     return user_credentials
 
-def update_location(user_id, latitude, longitude):
+def update_location(user_id, latitude, longitude, role="Cop"):
     user_data = fetch_user_data(user_id)
+    print("update location user_data", user_data)
     #change latitude
     user_data[3] = latitude
-
     #change longitude
     user_data[4] = longitude
+    #change longitude
+    user_data[5] = role
+    
     print("Within update location ", user_data)
     store_user_location(user_id, *user_data)
 
@@ -150,25 +154,25 @@ def fetch_user_location(user_id):
     # print(location)
     return location
 # User data
-user_id = 1003
-username = "john_doe"
-password = "secure_password"
-status = "active"
-latitude = "37.7749"
-longitude = "-79.5555"
+# user_id = 1003
+# username = "john_doe"
+# password = "secure_password"
+# status = "active"
+# latitude = "37.7749"
+# longitude = "-79.5555"
 
 # Store user location
 # store_user_location(user_id, username, password, status, latitude ,longitude)
 
 # User data
-user_id = 1002
-username = "mary_kom"
-password = "secure_password"
-status = "active"
-latitude = "35.89"
-longitude = "-54.4194"
+# user_id = 1002
+# username = "mary_kom"
+# password = "secure_password"
+# status = "active"
+# latitude = "35.89"
+# longitude = "-54.4194"
 
 # update_location("1003", "45", "54")
 # print(fetch_user_data("1003"))
-update_user("1001", ['John Cena', 'john', 'active', 42.338519, -71.087312])
+# update_user("1001", ['John Cena', 'john', 'active', 42.338519, -71.087312, "Cop"])
 get_active_users()
