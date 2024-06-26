@@ -21,19 +21,19 @@ function saveAuthorisation(keys) {
       // No web storage Support :-(
   }
 }
-function getAuthorisation() {
-  if (typeof Storage !== 'undefined') {
-      try {
-        var keys = JSON.parse(localStorage.getItem(localStorageAuthKey));
-        return keys;
+// function getAuthorisation() {
+//   if (typeof Storage !== 'undefined') {
+//       try {
+//         var keys = JSON.parse(localStorage.getItem(localStorageAuthKey));
+//         return keys;
 
-      } catch (ex) {
-          console.log(ex);
-      }
-  } else {
-      // No web storage Support :-(
-  }
-}
+//       } catch (ex) {
+//           console.log(ex);
+//       }
+//   } else {
+//       // No web storage Support :-(
+//   }
+// }
 
 
 const useStyles = makeStyles((theme) => ({
