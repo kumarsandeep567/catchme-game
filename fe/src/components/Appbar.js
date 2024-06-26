@@ -12,7 +12,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { hexToRgb, makeStyles, rgbToHex } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
 
@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
+    backgroundColor: rgbToHex("#ffffff"),
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -68,12 +69,14 @@ const useStyles = makeStyles((theme) => ({
   },
   menuButton: {
     marginRight: 36,
+    color: hexToRgb("#0000008a")
   },
   menuButtonHidden: {
     display: 'none',
   },
   title: {
     flexGrow: 1,
+    color: hexToRgb("#000000")
   },
   drawerPaper: {
     position: 'relative',
@@ -167,8 +170,16 @@ export default function Dashboard() {
       <CssBaseline />
 
       {/* This is the header AppBar */}
-      <AppBar position="absolute" className={clsx(classes.appBar, 
-          open && classes.appBarShift, collapsed && classes.appBar)}>
+      <AppBar 
+        position="absolute" 
+        className={
+          clsx(
+            classes.appBar, 
+            open && classes.appBarShift, 
+            collapsed && classes.appBar
+          )
+        }
+      >
         <Toolbar title={title} className={classes.toolbar}>
 
           {/* The Menu icon exposes the left pane menu bar */}
@@ -180,6 +191,17 @@ export default function Dashboard() {
             className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
           >
             <MenuIcon />
+          </IconButton>
+
+          {/* The Menu icon exposes the left pane menu bar */}
+          <IconButton
+            edge="end"
+            color="inherit"
+            aria-label="signin"
+            onClick={handleDrawerOpen}
+            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
+          >
+            <AccountCircleIcon />
           </IconButton>
 
           {/* The title is set by the components */}
