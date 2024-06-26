@@ -296,8 +296,8 @@ function GeoLocation(props) {
             padding: '5px',
             border: '1px solid black',
             borderRadius: '3px',
-            top: '10px',
-            left: '10px',
+            top: '100px',
+            left: '100px',
           }}
         >
           <p>User ID: {tooltip.userId}</p>

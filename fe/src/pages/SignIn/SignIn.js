@@ -201,7 +201,7 @@ const SignIn = () => {
     logout();
 
     // back to landing page!
-    history.push("/");
+    history.push("/signin");
   }
 
 
