@@ -44,34 +44,48 @@ def app_settings():
 
     # User data
     user_id = 1001
-    username = "John Cena"
-    password = "john"
+    username = "Elon Musk"
+    password = "Tesla"
     status = "inactive"
     latitude = "37.7749"
     longitude = "-79.5555"
+    role = "Cop"
 
     # Store user location
-    store_user_location(user_id, username, password, status, latitude ,longitude)
-
+    store_user_location(user_id, username, password, status, latitude ,longitude, role)
+    
     # User data
     user_id = 1002
-    username = "Randy Orton"
-    password = "randy"
+    username = "Jeff Bezos"
+    password = "BlueHorizon"
     status = "inactive"
-    latitude = "35.89"
-    longitude = "-54.4194"
+    latitude = "37.7749"
+    longitude = "-79.5555"
+    role = "Mafia"
 
     # Store user location
-    store_user_location(user_id, username, password, status, latitude ,longitude)
+    store_user_location(user_id, username, password, status, latitude ,longitude, role)
 
     # User data
     user_id = 1003
-    username = "Rey Misterio"
-    password = "rey"
+    username = "Bill Gates"
+    password = "Clippy"
     status = "inactive"
     latitude = "35.89"
     longitude = "-54.4194"
-    store_user_location(user_id, username, password, status, latitude ,longitude)
+    role = "Mafia"
+
+    # Store user location
+    store_user_location(user_id, username, password, status, latitude ,longitude, role)
+
+    # # User data
+    # user_id = 1003
+    # username = "Rey Misterio"
+    # password = "rey"
+    # status = "inactive"
+    # latitude = "35.89"
+    # longitude = "-54.4194"
+    # store_user_location(user_id, username, password, status, latitude ,longitude)
 
     # This key will be used when encoding and decoding the 
     # access tokens
@@ -225,6 +239,8 @@ def login():
         print("got user_name ", user_name)
         password = request.json['password']
         print("got password ", password)
+        role = request.json['role']
+        print("got role ", role)
 
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
@@ -282,6 +298,7 @@ def login():
                 # Prepare the tokens for serialization
                 server_response = ({
                     "userId": user_id,
+                    "role": role,
                     "access_token": access_token,
                     "refresh_token": refresh_token,
                     "expiration_time": expiration_time
@@ -311,9 +328,10 @@ def get_player_location():
     try:
        
         # Try getting the player details from the query parameters
-        player_id = user_id
+        player_id = request.json['id']
         player_latitude = request.json['lat']
         player_longitude = request.json['lon']
+        player_role = request.json['role']
 
          # Get the player details from the request and broadcast
         data = request.get_json()
@@ -323,20 +341,22 @@ def get_player_location():
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
         print("Player ID is ", player_id)
+        print("Player Role is ", player_role)
         print("Player Latitude is ", player_latitude)
         print("Player Longitude is ", player_longitude)
         
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
         #debug
-        print("before update location: ", player_id, player_latitude, player_longitude)
+        print("before update location: ", player_id, player_latitude, player_longitude, player_role)
         #update the user's current location
-        update_location(player_id, player_latitude, player_longitude)
+        update_location(player_id, player_latitude, player_longitude, player_role)
 
         print("update location")
 
         # Create a dictionary with player details to send back as a response
         broadcast_receipents[player_id] = {
+            'role': player_role,
             'latitude': player_latitude,
             'longitude': player_longitude
         }

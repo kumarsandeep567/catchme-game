@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { Router, Route, Link } from "react-router-dom";
 import { createBrowserHistory } from "history";
@@ -6,19 +6,11 @@ import { createBrowserHistory } from "history";
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 
 import { hexToRgb, makeStyles, rgbToHex } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Divider from '@material-ui/core/Divider';
 
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import MapIcon from '@material-ui/icons/Map';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 // import Badge from '@material-ui/core/Badge';
@@ -39,10 +31,12 @@ const history = createBrowserHistory();
 // css
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex',
+    display: 'flex'
   },
   toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
+    paddingRight: 24, 
+    display: 'flex',
+  justifyContent: 'space-between'
   },
   toolbarIcon: {
     display: 'flex',
@@ -67,47 +61,19 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
-  menuButton: {
+  appBarButton: {
     marginRight: 36,
     color: hexToRgb("#0000008a")
   },
-  menuButtonHidden: {
+  appBarButtonHidden: {
     display: 'none',
+  },
+  appBarTextButtonSpacing: {
+    marginRight: '5px'
   },
   title: {
     flexGrow: 1,
     color: hexToRgb("#000000")
-  },
-  drawerPaper: {
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    width: drawerWidth,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawerPaperClose: {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(9),
-    },
-  },
-  drawerPaperCollapsed: {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(0),
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(0),
-    },
   },
   appBarSpacer: theme.mixins.toolbar,
   content: {
@@ -127,138 +93,117 @@ const useStyles = makeStyles((theme) => ({
   },
   fixedHeight: {
     height: 240,
-  },
-  footer: {
-    position: 'fixed',
-    left: 0,
-    bottom: 0,
-    width: '100%',
-    backgroundColor: 'grey',
-    color: 'white',
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
+  }
 }));
 
 export default function Dashboard() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-  const [collapsed, setCollapsed] = React.useState(true);
   const pathname = window.location.pathname;
   const trimmedPath = pathname.substring(1);
   const capitalizedPath = trimmedPath.charAt(0).toUpperCase() + trimmedPath.slice(1);
   const [title, setTitle] = React.useState(capitalizedPath);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-    setCollapsed(false);
-  };
-  const handleDrawerClose = () => {
-    setOpen(false);
-    setCollapsed(false);
-  };
-  // const handleDrawerCollapsed = () => {
-  //   setCollapsed(true);
-  //   setOpen(false);
-  // };
+  // Default states for checking whether user is signed in or not
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
   const onItemClick = title => () => {
     setTitle(title);
+  };
+
+  // Read cookie and return the required value
+  const readCookie = (name) => {
+
+    // Each cookie has attributes separated by a ';'
+    const cookies = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(`${name}=`));
+   
+    return cookies ? cookies.split("=")[1] : null;
+   };
+
+  // Update signed in state based on cookie 'userId'
+   useEffect(() => {
+    const userId = readCookie('userId');
+    setIsSignedIn(!!userId);
+  }, []);
+
+  // Sign out handler
+  const handleSignOut = () => {
+
+    // Delete the userId and accessToken cookies
+    const userIdCookie = readCookie('userId');
+    const accessTokenCookie = readCookie('accessToken');
+    document.cookie = `userId=${userIdCookie}; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    document.cookie = `accessToken=${accessTokenCookie}; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    
+    // Set state as logged out
+    setIsSignedIn(false);
+
+    // Redirect to sign-in page
+    history.push('/signin');
+
+    // Since cookies are still visible, force page reload
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   return (
     <div className={classes.root}>
       <CssBaseline />
-
-      {/* This is the header AppBar */}
-      <AppBar 
-        position="absolute" 
-        className={
-          clsx(
-            classes.appBar, 
-            open && classes.appBarShift, 
-            collapsed && classes.appBar
-          )
-        }
-      >
-        <Toolbar title={title} className={classes.toolbar}>
-
-          {/* The Menu icon exposes the left pane menu bar */}
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          {/* The Menu icon exposes the left pane menu bar */}
-          <IconButton
-            edge="end"
-            color="inherit"
-            aria-label="signin"
-            onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-          >
-            <AccountCircleIcon />
-          </IconButton>
-
-          {/* The title is set by the components */}
-          <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-            {title}
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
       {/* The Router component routes URLs to your components */}
       <Router history={history} title={title} >
-
-        {/* Drawers are left pane menu items in React-speak */}
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, 
-              !open && classes.drawerPaperClose,
-              collapsed && classes.drawerPaperCollapsed)
-          }}
-          open={open}
+        {/* This is the header AppBar */}
+        <AppBar 
+          position="absolute" 
+          className={
+            clsx(classes.appBar)
+          }
         >
-          <div className={classes.toolbarIcon}>
+          <Toolbar 
+            title={title} 
+            className={classes.toolbar}
+          >
+             {/* The title is set by the components */}
+             <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
+              {title}
+            </Typography>
 
-            {/* This icon collapses the left pane enough to show menu item icons */}
-            <IconButton onClick={handleDrawerClose}>
-            <MenuIcon />
-            </IconButton>
-          </div>
-          <Divider />
-
-          {/* Left pane menu items */}
-          <List>
-
-          {/* Geolocation menu item */}
-          <ListItem button component={Link} to="/geolocation" onClick={onItemClick('Geolocation')}>
-              <ListItemIcon>
-                <MapIcon />
-              </ListItemIcon>
-              <ListItemText primary="Geolocation" />
-              { title === 'Geolocation' }
-            </ListItem>
-
-            {/* SignUp menu item */}
-            <ListItem button component={Link} to="/signin" onClick={onItemClick('Sign In')}>
-              <ListItemIcon>
-                <AccountCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sign In" />
-              { title === 'Sign In' }
-            </ListItem>
-          </List>
-        </Drawer>
-
+            <div>
+              {/* The Sign-in icon on the AppBar */}
+              {
+                isSignedIn ? (
+                  <IconButton
+                    edge="end"
+                    color="inherit"
+                    aria-label="signout"
+                    component={Link}
+                    onClick={handleSignOut}
+                    className={clsx(classes.appBarButton)}
+                  >
+                    <AccountCircleIcon className={classes.appBarTextButtonSpacing}/>
+                    {'Sign out'}
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    edge="end"
+                    color="inherit"
+                    aria-label="signin"
+                    component={Link}
+                    to="/signin"
+                    onClick={onItemClick('Sign in')}
+                    className={clsx(classes.appBarButton)}
+                  >
+                    <AccountCircleIcon className={classes.appBarTextButtonSpacing}/>
+                    {'Sign In'}
+                  </IconButton>
+                )}
+                {console.log(isSignedIn)}
+            </div>
+          </Toolbar>
+        </AppBar>
         {/* This is your mission control: Matches URLs above to your components */}
         <main className={classes.content}>
-
           {/* menu paths */}
           <Route exact path="/" component={Home} />
           <Route path="/signin" component={SignIn} />
@@ -268,7 +213,6 @@ export default function Dashboard() {
           <Route path="/geolocation" component={Geolocation} />
         </main>
       </Router>
-      
       {/* Whatever you put here will appear on all your pages, style appropriately! */}
     </div>
   );
