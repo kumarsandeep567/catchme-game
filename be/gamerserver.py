@@ -292,6 +292,7 @@ def login():
                 
                 user_data = fetch_user_data(user_id)
                 user_data[2] = "active"
+                user_data[-1] = role
 
                 update_user(user_id, user_data)
                 
