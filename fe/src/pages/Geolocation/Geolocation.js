@@ -28,6 +28,12 @@ const markerColors = [
   `rgb(149, 188, 208)`, // blue
 ];
 
+const markerColors2 = {
+  'Cop':`rgb(255, 0, 0)`, // red
+  'Mafia':`rgb(149, 188, 208)`  // blue
+};
+
+
 // Server address and port defined as env variables
 const server_address = `${process.env.REACT_APP_API_SERVICE_URL}`;
 
@@ -80,13 +86,15 @@ function GeoLocation(props) {
   };
 
   // Report player location (and any other data)
-  const reportPlayerLocation = useCallback((userId, latitude, longitude) => {
+  const reportPlayerLocation = useCallback((userId, role, latitude, longitude) => {
+
     // Organize the data to send in a dictionary
     const requestFields = {
-      id: userId,
-      lat: latitude,
-      lon: longitude,
-    };
+      'id': userId,
+      'role': role,
+      'lat': latitude,
+      'lon': longitude
+    }
 
     // Attempt to send the data to the Flask server
     try {
@@ -121,8 +129,6 @@ function GeoLocation(props) {
           alert("Error occured in responseData!");
           console.error(error);
         }
-      } else {
-        console.log(response);
       }
     } catch (error) {
       alert("Error occurred in reportPlayerLocation!");
@@ -144,11 +150,10 @@ function GeoLocation(props) {
 
           // Re-center the map based on the current latitude and longitude
           setCenter([position.coords.latitude, position.coords.longitude]);
-
-          // Notify the Flask application of changes in user's coordinates
           reportPlayerLocation(
-            readCookie("userId"),
-            position.coords.latitude,
+            readCookie('userId'), 
+            readCookie('role'),
+            position.coords.latitude, 
             position.coords.longitude
           );
         },
@@ -164,12 +169,37 @@ function GeoLocation(props) {
 
   // UseEffect hook to update location every 'x' seconds
   useEffect(() => {
+
     // Define the interval to update the players location
     // Since the location fetching is handled by the updateLocation()
     const interval = setInterval(updateLocation, updateDuration);
 
     // Clear interval on component unmount
     return () => clearInterval(interval);
+  }, [updateLocation]);
+
+  // UseEffect hook to broacast location
+  useEffect(() => {
+    socket.on('location_update', (data) => {
+      setUsers((prevUsers) => ({ ...prevUsers, ...data }));
+    });
+
+    socket.on('all_users', (data) => {
+      setUsers(data);
+    });
+
+  }, [updateLocation]);
+
+  // UseEffect hook to broacast location
+  useEffect(() => {
+    socket.on('location_update', (data) => {
+      setUsers((prevUsers) => ({ ...prevUsers, ...data }));
+    });
+
+    socket.on('all_users', (data) => {
+      setUsers(data);
+    });
+
   }, [updateLocation]);
 
   // UseEffect hook to broacast location
@@ -215,7 +245,6 @@ function GeoLocation(props) {
 
       {/* Enable this button to update location manually */}
       {/* <button onClick={updateLocation}>Get Location</button> */}
-
       <h2>
         Player {readCookie('userId').concat("'s coordinates")}</h2>
       <h3>
@@ -258,7 +287,7 @@ function GeoLocation(props) {
           <Marker
             key={userId}
             width={50}
-            color={markerColors[userId]}
+            color={markerColors2[users[userId].role]}
             anchor={[users[userId].latitude, users[userId].longitude]}
             onMouseOver={
               () => mouseHoverActiveHandler(

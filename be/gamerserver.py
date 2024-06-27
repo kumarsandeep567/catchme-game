@@ -1,12 +1,17 @@
 import os
 import jwt
 from http import HTTPStatus
-from flask_bcrypt import Bcrypt
 from flask import Flask, request, jsonify
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 from datetime import datetime, timedelta, timezone
-from redis_trial import *
+from bson.objectid import ObjectId
+from redis_lib import *
+
+# This variable will store the application settings and
+# made available globally (used by app_settings() method)
+g = dict()
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -36,6 +41,51 @@ broadcast_receipents = dict()
 
 def app_settings():
     global g
+
+    # User data
+    user_id = 1001
+    username = "Elon Musk"
+    password = "Tesla"
+    status = "inactive"
+    latitude = "37.7749"
+    longitude = "-79.5555"
+    role = "Cop"
+
+    # Store user location
+    store_user_location(user_id, username, password, status, latitude ,longitude, role)
+    
+    # User data
+    user_id = 1002
+    username = "Jeff Bezos"
+    password = "BlueHorizon"
+    status = "inactive"
+    latitude = "37.7749"
+    longitude = "-79.5555"
+    role = "Mafia"
+
+    # Store user location
+    store_user_location(user_id, username, password, status, latitude ,longitude, role)
+
+    # User data
+    user_id = 1003
+    username = "Bill Gates"
+    password = "Clippy"
+    status = "inactive"
+    latitude = "35.89"
+    longitude = "-54.4194"
+    role = "Mafia"
+
+    # Store user location
+    store_user_location(user_id, username, password, status, latitude ,longitude, role)
+
+    # # User data
+    # user_id = 1003
+    # username = "Rey Misterio"
+    # password = "rey"
+    # status = "inactive"
+    # latitude = "35.89"
+    # longitude = "-54.4194"
+    # store_user_location(user_id, username, password, status, latitude ,longitude)
 
     # This key will be used when encoding and decoding the 
     # access tokens
@@ -184,15 +234,26 @@ def decode_token(token):
 @cross_origin()
 def login():
     try:
-        user = request.json['name']
+        print("getting user details from request object..")
+        user_name = request.json['name']
+        print("got user_name ", user_name)
         password = request.json['password']
+        print("got password ", password)
+        role = request.json['role']
+        print("got role ", role)
 
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
         # Get all users setup by app_settings()
-        available_users = read_app_settings('users')
+        #old code
+        # available_users = read_app_settings('users')
 
-        if user not in available_users:
+        #getting user credentials using redis
+        print("getting user details... ")
+        user = get_user_credentials(user_name)
+        print("outside if: ", user)
+
+        if user[1] == "":
 
             # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
             print('Unknown user trying to login ...')
@@ -204,11 +265,15 @@ def login():
         else:
 
             # Get the user's hashed password from app_settings()
-            password_hash = read_app_settings('password_hashes')[available_users.index(user)]
+            password_hash = user[2]
+            print("within else condition",user[2])
+            # password_hash = read_app_settings('password_hashes')[available_users.index(user)]
 
             # Hash the user provided password and compare it with
             # password_hash
-            if not bcrypt.check_password_hash(password_hash, password):
+            # if not bcrypt.check_password_hash(password_hash, password):
+            if password != password_hash:
+                print("within else-if condition ",user[2])
 
                 # Wrong password
                 server_response = (
@@ -217,15 +282,24 @@ def login():
                 )
             else:
                 # Create the tokens for the user
-                user_id = read_app_settings('user_ids')[available_users.index(user)]
+                # user_id = read_app_settings('user_ids')[available_users.index(user)]
+                user_id = user[0]
                 access_token = encode_token(user_id, "access")
+                print("else: access token ", access_token)
                 refresh_token = encode_token(user_id, "refresh")
                 expiration_time = decode_token(access_token)['expiration_time']
                 g['logged_userId'] = user_id
                 
+                user_data = fetch_user_data(user_id)
+                user_data[2] = "active"
+                user_data[-1] = role
+
+                update_user(user_id, user_data)
+                
                 # Prepare the tokens for serialization
                 server_response = ({
                     "userId": user_id,
+                    "role": role,
                     "access_token": access_token,
                     "refresh_token": refresh_token,
                     "expiration_time": expiration_time
@@ -258,6 +332,7 @@ def get_player_location():
         player_id = request.json['id']
         player_latitude = request.json['lat']
         player_longitude = request.json['lon']
+        player_role = request.json['role']
 
          # Get the player details from the request and broadcast
         data = request.get_json()
@@ -267,26 +342,25 @@ def get_player_location():
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
         print("Player ID is ", player_id)
+        print("Player Role is ", player_role)
         print("Player Latitude is ", player_latitude)
         print("Player Longitude is ", player_longitude)
         
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
-        store_user_location(player_id, player_latitude, player_longitude)
+        #debug
+        print("before update location: ", player_id, player_latitude, player_longitude, player_role)
+        #update the user's current location
+        update_location(player_id, player_latitude, player_longitude, player_role)
 
-        location = fetch_user_location(user_id)
+        print("update location")
 
         # Create a dictionary with player details to send back as a response
         broadcast_receipents[player_id] = {
+            'role': player_role,
             'latitude': player_latitude,
             'longitude': player_longitude
         }
-
-        broadcast_receipents[player_id] = {
-            'latitude': player_latitude,
-            'longitude': player_longitude
-        }
-
 
         # Broadcast logged-in user's location to all connected users
         socketio.emit(
