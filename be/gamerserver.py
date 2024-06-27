@@ -78,15 +78,6 @@ def app_settings():
     # Store user location
     store_user_location(user_id, username, password, status, latitude ,longitude, role)
 
-    # # User data
-    # user_id = 1003
-    # username = "Rey Misterio"
-    # password = "rey"
-    # status = "inactive"
-    # latitude = "35.89"
-    # longitude = "-54.4194"
-    # store_user_location(user_id, username, password, status, latitude ,longitude)
-
     # This key will be used when encoding and decoding the 
     # access tokens
     if 'secret_key' not in g:
@@ -109,6 +100,10 @@ def app_settings():
     if 'refresh_token_expiration' not in g:
         g['refresh_token_expiration'] = os.environ.get("REFRESH_TOKEN_EXPIRATION", 2592000)
 
+    # Define the URL for the database
+    if 'database_url' not in g:
+        g['database_url'] = os.environ.get("DATABASE_URL", 'redis://localhost:6379/')
+        
     # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
     
     # Create some users for the application
