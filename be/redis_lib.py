@@ -29,8 +29,9 @@ def fetch_user_data(user_id):
         list: A list containing the latitude and longitude.
     """
     key = f"users:{user_id}"
+    print(key)
     data = client.lrange(key, 0, -1)
-    print("Len of data", len(data))
+    print("Len of data and data: ", len(data), data)
     return data
 
 def get_active_users():
@@ -132,9 +133,9 @@ def get_user_credentials(user_name):
     print(user_credentials)
     return user_credentials
 
-def update_location(user_id, latitude, longitude, role="Cop"):
+def update_location(user_id, latitude, longitude, role):
     user_data = fetch_user_data(user_id)
-    print("update location user_data", user_data)
+    print("within-> before updating location: user_data", user_data)
     #change latitude
     user_data[3] = latitude
     #change longitude
@@ -142,7 +143,7 @@ def update_location(user_id, latitude, longitude, role="Cop"):
     #change longitude
     user_data[5] = role
     
-    print("Within update location ", user_data)
+    print("within -> after updating location: user_data", user_data)
     store_user_location(user_id, *user_data)
 
     print("Location for the user: ", user_data[0], " updated successfully!")
@@ -171,8 +172,3 @@ def fetch_user_location(user_id):
 # status = "active"
 # latitude = "35.89"
 # longitude = "-54.4194"
-
-# update_location("1003", "45", "54")
-# print(fetch_user_data("1003"))
-# update_user("1001", ['John Cena', 'john', 'active', 42.338519, -71.087312, "Cop"])
-get_active_users()
