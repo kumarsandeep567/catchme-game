@@ -57,6 +57,18 @@ function GeoLocation(props) {
   // Set default active users
   const [users, setUsers] = useState({});
 
+  // Default value (in milliseconds) for updateLocation 
+  // interval (1 second = 1000 ms)
+  const updateDuration = 3000;
+
+  // Default state for marker tooltips
+  const [tooltip, setTooltip] = useState({ 
+    visible: false, 
+    userId: null, 
+    latitude: null, 
+    longitude: null 
+  });
+
   // Read cookie and return the required value
   const readCookie = (name) => {
     // Each cookie has attributes separated by a ';'
@@ -123,11 +135,17 @@ function GeoLocation(props) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          
+          // Set the Latitude, Longitude, Heading, and Speed 
           setLat(position.coords.latitude);
           setLng(position.coords.longitude);
           setHea(position.coords.heading);
           setSpd(position.coords.speed);
+
+          // Re-center the map based on the current latitude and longitude
           setCenter([position.coords.latitude, position.coords.longitude]);
+
+          // Notify the Flask application of changes in user's coordinates
           reportPlayerLocation(
             readCookie("userId"),
             position.coords.latitude,
@@ -144,12 +162,11 @@ function GeoLocation(props) {
     console.log("Updating postition now...");
   }, [reportPlayerLocation]);
 
-  // UseEffect hook to update location every 10 seconds
+  // UseEffect hook to update location every 'x' seconds
   useEffect(() => {
     // Define the interval to update the players location
     // Since the location fetching is handled by the updateLocation()
-    // call the method every 10 seconds (10 seconds = 10000 ms)
-    const interval = setInterval(updateLocation, 10000);
+    const interval = setInterval(updateLocation, updateDuration);
 
     // Clear interval on component unmount
     return () => clearInterval(interval);
@@ -171,6 +188,27 @@ function GeoLocation(props) {
     };
   }, []);
 
+
+  // Show the tooltip when the user hovers over a map marker
+  const mouseHoverActiveHandler = (userId, latitude, longitude) => {
+    setTooltip({ 
+      visible: true, 
+      userId, 
+      latitude, 
+      longitude 
+    });
+  };
+
+  // Hide the tooltip when the user no longer hovers over a map marker
+  const mouseHoverInactiveHandler = () => {
+    setTooltip({ 
+      visible: false, 
+      userId: null, 
+      latitude: null, 
+      longitude: null 
+    });
+  };
+
   return (
     <div style={{ backgroundColor: "white", padding: 72 }}>
       <br></br>
@@ -178,10 +216,17 @@ function GeoLocation(props) {
       {/* Enable this button to update location manually */}
       {/* <button onClick={updateLocation}>Get Location</button> */}
 
+      <h2>
+        Player {readCookie('userId').concat("'s coordinates")}</h2>
+      <h3>
+        Latitude: {Lat}
+      </h3>
+      <h3>
+        Longitude: {Lon}
+      </h3>
+
       {/* Some of these are not used but defined above */}
       {/* 'AND' these values with 'null' for now to hide them */}
-      <h3>Latitude: {Lat}</h3>
-      <h3>Longitude: {Lon}</h3>
       {null && Hea && <h3>Heading: {Hea}</h3>}
       {null && Spd && <h3>Speed: {Spd}</h3>}
 
@@ -197,17 +242,57 @@ function GeoLocation(props) {
           setZoom(zoom);
         }}
       >
-        {/* Added 3 markers to represent 3 players on the map */}
+        {/* 
+          CAUTION: If the Flask application is put behind ngrok, socket 
+          connections do not work for some reason. When this happens,
+          Object.keys() will have null values and no marker will be 
+          placed on the map.
+        */}
 
+        {/* Dynamically add markers to represent players on the map */}
         {Object.keys(users).map((userId) => (
-          <Overlay anchor={[users[userId].latitude, users[userId].longitude]}>
-            <img src="policeman.svg" width={40} height={58} alt="" />
-          </Overlay>
+        //   <Overlay anchor={[users[userId].latitude, users[userId].longitude]}>
+        //   <img src="policeman.svg" width={40} height={58} alt="" />
+        // </Overlay>
+
+          <Marker
+            key={userId}
+            width={50}
+            color={markerColors[userId]}
+            anchor={[users[userId].latitude, users[userId].longitude]}
+            onMouseOver={
+              () => mouseHoverActiveHandler(
+                userId, 
+                users[userId].latitude, 
+                users[userId].longitude
+              )
+            }
+            onMouseOut={mouseHoverInactiveHandler}
+          />
         ))}
 
         {/* Add default +/- buttons to allow zoom controls on the map */}
         <ZoomControl />
       </Map>
+
+      {/* Styling and content of the tooltips */}
+      {tooltip.visible && (
+        <div
+          style={{
+            position: 'absolute',
+            backgroundColor: 'white',
+            padding: '5px',
+            border: '1px solid black',
+            borderRadius: '3px',
+            top: '100px',
+            left: '100px',
+          }}
+        >
+          <p>User ID: {tooltip.userId}</p>
+          <p>Latitude: {tooltip.latitude}</p>
+          <p>Longitude: {tooltip.longitude}</p>
+        </div>
+      )}
     </div>
   );
 }
