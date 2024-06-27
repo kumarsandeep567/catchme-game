@@ -291,6 +291,7 @@ def login():
                 g['logged_userId'] = user_id
                 
                 user_data = fetch_user_data(user_id)
+                print(user_data)
                 user_data[2] = "active"
                 user_data[-1] = role
 
@@ -333,7 +334,12 @@ def get_player_location():
         player_latitude = request.json['lat']
         player_longitude = request.json['lon']
         player_role = request.json['role']
-        
+
+         # Get the player details from the request and broadcast
+        data = request.get_json()
+        data['userId'] = player_id
+        # socketio.emit('location_update', data)
+
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
         print("Player ID is ", player_id)
@@ -346,21 +352,29 @@ def get_player_location():
         #debug
         print("before update location: ", player_id, player_latitude, player_longitude, player_role)
         #update the user's current location
-        update_location(player_id, player_latitude, player_longitude, player_role)
+        update_location(user_id, player_latitude, player_longitude, player_role)
+         
+        print("[DONE]update location")
 
-        print("update location")
+        #Code to get data of all active users from redis
+        active_users = get_active_users()
 
-        # Get the player details from the request and broadcast
-        data = request.get_json()
-        data['userId'] = player_id
-        # socketio.emit('location_update', data)
-        
         # Create a dictionary with player details to send back as a response
-        broadcast_receipents[player_id] = {
-            'role': player_role,
-            'latitude': player_latitude,
-            'longitude': player_longitude
-        }
+        for item in active_users:
+            for user_id, details in item.items():
+                broadcast_recipients[user_id] = {
+                    'role': details[-1],       # The last element in the list is the role
+                    'latitude': details[-3],   # The third last element is the latitude
+                    'longitude': details[-2]   # The second last element is the longitude
+                }
+
+        ############OLD CODE###########
+        # broadcast_receipents[player_id] = {
+        #     'role': player_role,
+        #     'latitude': player_latitude,
+        #     'longitude': player_longitude
+        # }
+        ############OLD CODE###########
 
         # Broadcast logged-in user's location to all connected users
         socketio.emit(
