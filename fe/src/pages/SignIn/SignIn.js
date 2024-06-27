@@ -4,6 +4,7 @@ import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
+import MenuItem from '@material-ui/core/MenuItem'
 import Paper from '@material-ui/core/Paper'
 import { Link } from 'react-router-dom'
 
@@ -81,8 +82,9 @@ const useStyles = makeStyles((theme) => ({
 //  +++ Set cookies after successful SignIn +++
 //  ==========================================================
 
-const setCookie = (userId, accessToken, time) => {
+const setCookie = (userId, role, accessToken, time) => {
   document.cookie = `userId=${userId}; expires=${time}; path=/`;
+  document.cookie = `role=${role}; expires=${time}; path=/`;
   document.cookie = `accessToken=${accessToken}; expires=${time}; path=/`;
  };
 
@@ -92,15 +94,22 @@ const SignIn = () => {
   const history = useHistory()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('')
 
   // we submit username and password, we receive
   // access and refresh tokens in return. These
   // tokens encode the userid
   function handleSubmit(event) {
     event.preventDefault()
+
+    console.log(username);
+    console.log(password);
+    console.log(role);
+
     const paramdict = {
       'name': username,
-      'password': password
+      'password': password,
+      'role': role
     }
     const config = {
       method: 'POST',
@@ -117,7 +126,7 @@ const SignIn = () => {
     fetch(`${process.env.REACT_APP_API_SERVICE_URL}/login`, config)
       .then(response => response.json())
       .then(data => {
-        setCookie(data[0].userId, data[0].access_token, data[0].expiration_time);
+        setCookie(data[0].userId, data[0].role, data[0].access_token, data[0].expiration_time);
         console.log('---');
         saveAuthorisation({
           access: data[0].access_token,
@@ -173,6 +182,22 @@ const SignIn = () => {
               id="password"
               autoComplete="current-password"
             />
+            <TextField
+              select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="role"
+              label={'Role'}
+              id="role"
+              autoComplete="current-role"
+            >
+              <MenuItem value="cop">Cop</MenuItem>
+              <MenuItem value="mafia">Mafia</MenuItem>
+            </TextField>
             <Button
               type="submit"
               fullWidth
