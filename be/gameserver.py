@@ -442,15 +442,15 @@ def get_player_location():
                     )
 
                     # Elimination logic
-                    # if distance(cop_location, mafia_location) <= read_app_settings('elimination_distance'):
-                    #     del broadcast_recipients[_player]
-                    #     mafia_players.remove(_player)
+                    if distance(cop_location, mafia_location) <= read_app_settings('elimination_distance'):
+                        del broadcast_recipients[_player]
+                        mafia_players.remove(_player)
 
-                    #     print("Mafia eliminated", _player)
-                    #     socketio.emit(
-                    #         'mafia_eliminated', 
-                    #         {'mafia_id': _player}
-                    #     )
+                        print("Mafia eliminated", _player)
+                        socketio.emit(
+                            'mafia_eliminated', 
+                            {'mafia_id': _player}
+                        )
 
                 socketio.emit(
                     'cop_location_update', 

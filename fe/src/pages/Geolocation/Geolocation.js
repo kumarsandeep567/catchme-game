@@ -262,13 +262,15 @@ function GeoLocation(props) {
         {Object.keys(playersCop).map((userId) => {
           const user = playersCop[userId];
           const color = markerColors2[playersCop[userId].role];
+          const latitude = Number(playersCop[userId].latitude);
+          const longitude = Number(playersCop[userId].longitude);
           console.log(`Marker for user ${userId}:`, user, `Color: ${color}`);
           return (
             <Marker
               key={userId}
-              width={50}
+              width={70}
               color={color}
-              anchor={[playersCop[userId].latitude, playersCop[userId].longitude]}
+              anchor={[latitude, longitude]}
               onMouseOver={
                 () => mouseHoverActiveHandler(
                   userId, 
@@ -292,7 +294,7 @@ function GeoLocation(props) {
               key={userId}
               width={50}
               color={color}
-              anchor={[defaultLatitude, longitude]}
+              anchor={[latitude, longitude]}
               onMouseOver={
                 () => mouseHoverActiveHandler(
                   userId, 
