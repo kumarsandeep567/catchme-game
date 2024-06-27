@@ -333,11 +333,6 @@ def get_player_location():
         player_latitude = request.json['lat']
         player_longitude = request.json['lon']
         player_role = request.json['role']
-
-         # Get the player details from the request and broadcast
-        data = request.get_json()
-        data['userId'] = player_id
-        socketio.emit('location_update', data)
         
         # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
         
@@ -355,6 +350,11 @@ def get_player_location():
 
         print("update location")
 
+        # Get the player details from the request and broadcast
+        data = request.get_json()
+        data['userId'] = player_id
+        # socketio.emit('location_update', data)
+        
         # Create a dictionary with player details to send back as a response
         broadcast_receipents[player_id] = {
             'role': player_role,
