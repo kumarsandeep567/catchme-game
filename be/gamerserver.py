@@ -284,6 +284,7 @@ def login():
                 # Create the tokens for the user
                 # user_id = read_app_settings('user_ids')[available_users.index(user)]
                 user_id = user[0]
+                
                 access_token = encode_token(user_id, "access")
                 print("else: access token ", access_token)
                 refresh_token = encode_token(user_id, "refresh")
@@ -352,7 +353,7 @@ def get_player_location():
         #debug
         print("before update location: ", player_id, player_latitude, player_longitude, player_role)
         #update the user's current location
-        update_location(user_id, player_latitude, player_longitude, player_role)
+        update_location(player_id, player_latitude, player_longitude, player_role)
          
         print("[DONE]update location")
 
@@ -362,7 +363,7 @@ def get_player_location():
         # Create a dictionary with player details to send back as a response
         for item in active_users:
             for user_id, details in item.items():
-                broadcast_recipients[user_id] = {
+                broadcast_receipents[user_id] = {
                     'role': details[-1],       # The last element in the list is the role
                     'latitude': details[-3],   # The third last element is the latitude
                     'longitude': details[-2]   # The second last element is the longitude
