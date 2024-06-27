@@ -19,7 +19,7 @@ RUN npm ci
 
 # set environment variables
 ARG REACT_APP_API_SERVICE_URL
-ENV REACT_APP_API_SERVICE_URL $REACT_APP_API_SERVICE_URL
+ENV REACT_APP_API_SERVICE_URL http://localhost:5000
 # ARG NODE_ENV
 # ENV NODE_ENV $NODE_ENV
 
@@ -40,7 +40,7 @@ FROM nginx
 
 # copy static files
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html
-
+COPY ./nginx.conf /etc/nginx/nginx.conf
 # expose port
 EXPOSE 80
 

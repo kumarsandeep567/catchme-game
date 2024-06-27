@@ -147,7 +147,7 @@ def app_settings():
 
     # How closeby the cop must be to the mafia to arrest them
     # In meters
-    g['elimination_distance'] = 1
+    g['elimination_distance'] = 10
         
     # +++ DEBUG BLOCK: For debugging purposes only (REMOVE BEFORE DEPLOYING)
 
