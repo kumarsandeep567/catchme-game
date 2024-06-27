@@ -14,3 +14,4 @@ pytz
 dnspython
 redis
 redis_server
+geopy
