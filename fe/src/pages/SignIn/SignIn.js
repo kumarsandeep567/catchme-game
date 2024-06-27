@@ -5,7 +5,6 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 import MenuItem from '@material-ui/core/MenuItem'
-//import Button from '@material-ui/Button'
 import Paper from '@material-ui/core/Paper'
 import { Link } from 'react-router-dom'
 
@@ -104,7 +103,7 @@ const SignIn = () => {
     event.preventDefault()
 
     console.log(username);
-    //console.log(password);
+    console.log(password);
     console.log(role);
 
     const paramdict = {
@@ -196,8 +195,8 @@ const SignIn = () => {
               id="role"
               autoComplete="current-role"
             >
-              <MenuItem value="Cop">Cop</MenuItem>
-              <MenuItem value="Mafia">Mafia</MenuItem>
+              <MenuItem value="cop">Cop</MenuItem>
+              <MenuItem value="mafia">Mafia</MenuItem>
             </TextField>
             <Button
               type="submit"

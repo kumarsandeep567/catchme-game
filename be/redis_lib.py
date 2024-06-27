@@ -9,14 +9,10 @@ def store_user_location(user_id, username, password, status, latitude, longitude
 
     Args:
         user_id (str): The user's unique identifier.
-        username (str): The user's username.
-        password (str): The user's password.
         latitude (float): The user's latitude.
         longitude (float): The user's longitude.
-        role (str): The user's role.
     """
     # List of user data
-    print("Inside store_user user_id ", user_id)
     user_data = [username, password, status, latitude, longitude, role]
     key = f"users:{user_id}"
     client.delete(key)
@@ -117,10 +113,8 @@ def update_user(user_id, user_data):
         for key in keys:
             # print("key : ", key, " user_id: ", user_id)
             if key.split(':')[1] == user_id:
-                user_data_new = [user_data[0], user_data[1], user_data[2], user_data[3], user_data[4], user_data[5]]
-                print("user_data_new: ", user_data_new)
-                store_user_location(key.split(':')[1], *user_data_new)
-                print("updated user succesfully! ", user_data_new)
+                store_user_location(key.split(':')[1], *user_data)
+                print("updated user succesfully! ", user_data)
                 break
 
         if cursor == 0:
@@ -140,7 +134,7 @@ def get_user_credentials(user_name):
 
 def update_location(user_id, latitude, longitude, role="Cop"):
     user_data = fetch_user_data(user_id)
-    print("inside update fetch_user_data len ", len(user_data))
+    print("update location user_data", user_data)
     #change latitude
     user_data[3] = latitude
     #change longitude
@@ -148,15 +142,12 @@ def update_location(user_id, latitude, longitude, role="Cop"):
     #change longitude
     user_data[5] = role
     
-    user_data_new = user_data[:6]
-    print("Within update location", user_data_new)
-
-    store_user_location(user_id, *user_data_new)
+    print("Within update location ", user_data)
+    store_user_location(user_id, *user_data)
 
     print("Location for the user: ", user_data[0], " updated successfully!")
     
 def fetch_user_location(user_id):
-    print("Inside fetch_user_location user_id ", user_id)
     user_data = fetch_user_data(user_id)
     print(user_data)
     location = (user_data[3], user_data[4])
