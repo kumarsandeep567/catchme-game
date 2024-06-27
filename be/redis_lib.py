@@ -2,9 +2,9 @@ import redis
 import os
 
 # Connect to Redis
-redis_url = os.environ.get("DATABASE_URL", 'redis://localhost:6379/')
-client = redis.from_url(redis_url)
-# client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+# redis_url = os.environ.get("DATABASE_URL", 'redis://localhost:6379/')
+# client = redis.from_url(redis_url)
+client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 
 def store_user_location(user_id, username, password, status, latitude, longitude, role):
     """

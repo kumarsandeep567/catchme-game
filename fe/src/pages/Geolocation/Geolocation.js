@@ -151,7 +151,7 @@ function GeoLocation(props) {
   // UseEffect hook to update location every 'x' seconds
   useEffect(() => {
     const role = readCookie('role');
-    const interval = setInterval(updateLocation, role === 'Cop' ? copUpdateDuration : mafiaUpdateDuration);
+    const interval = setInterval(updateLocation, role === 'cop' ? copUpdateDuration : mafiaUpdateDuration);
     return () => clearInterval(interval);
   }, [updateLocation]);
 
@@ -278,13 +278,16 @@ function GeoLocation(props) {
         {Object.keys(playersMafia).map((userId) => {
           const user = playersMafia[userId];
           const color = markerColors2[playersMafia[userId].role];
+          const latitude = Number(playersMafia[userId].latitude);
+          const longitude = Number(playersMafia[userId].longitude);
           console.log(`Marker for user ${userId}:`, user, `Color: ${color}`);
+          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
           return (
             <Marker
               key={userId}
               width={50}
               color={color}
-              anchor={[playersMafia[userId].latitude, playersMafia[userId].longitude]}
+              anchor={[defaultLatitude, longitude]}
               onMouseOver={
                 () => mouseHoverActiveHandler(
                   userId, 
