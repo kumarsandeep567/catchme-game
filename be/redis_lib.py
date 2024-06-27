@@ -140,7 +140,7 @@ def get_user_credentials(user_name):
 
 def update_location(user_id, latitude, longitude, role="Cop"):
     user_data = fetch_user_data(user_id)
-    print("update location user_data", user_data)
+    print("inside update fetch_user_data len ", len(user_data))
     #change latitude
     user_data[3] = latitude
     #change longitude
@@ -148,8 +148,9 @@ def update_location(user_id, latitude, longitude, role="Cop"):
     #change longitude
     user_data[5] = role
     
-    print("Within update location ", user_data)
     user_data_new = user_data[:6]
+    print("Within update location", user_data_new)
+
     store_user_location(user_id, *user_data_new)
 
     print("Location for the user: ", user_data[0], " updated successfully!")

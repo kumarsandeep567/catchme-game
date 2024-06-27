@@ -390,7 +390,7 @@ def get_player_location():
 # ==========================================================
 @socketio.on('connect')
 def handle_connect():
-    emit('all_users', broadcast_receipents)
+    emit('all_users', broadcast_receipents, broadcast=True)
     
 # ==========================================================
 # +++ App pre-run configuration +++
