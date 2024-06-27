@@ -5,10 +5,10 @@ env:
     AWS_REGION: "us-east-2"
     # The Frontend and Backend are connected through an Application Load Balancer 
     # HTTP protocol (Frontend port: 80, Backend port: 5000)
-    REACT_APP_API_SERVICE_URL: "http://flask-react-alb-356355031.us-east-2.elb.amazonaws.com"
+    REACT_APP_API_SERVICE_URL: "http://localhost:5000"
     # The MongoDB is connected through a Network Load Balancer
-    # TCP protocol (MongoDB server port: 27017)
-    DATABASE_URL: "mongodb://flask-react-nlb-3da119cf9570067c.elb.us-east-2.amazonaws.com:27017/"
+    # TCP protocol (Redis server port: 6397)
+    DATABASE_URL: "redis:db:6397/"
 
 phases: 
   install: 
@@ -40,12 +40,12 @@ phases:
   build:
     commands:
       - echo "Building images [prod]..."
-      - docker build --no-cache -f ./db/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-db:prod --build-arg DATABASE_URL=$DATABASE_URL ./db
-      - docker build --no-cache -f ./be/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-be:prod ./be
-      - docker build --no-cache -f ./fe/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-fe:prod --build-arg NODE_ENV=production --build-arg REACT_APP_API_SERVICE_URL=$REACT_APP_API_SERVICE_URL ./fe
+      - docker build --no-cache -f ./db/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/catchme-game-db:prod ./db
+      - docker build --no-cache -f ./be/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/catchme-game-be:prod ./be
+      - docker build --no-cache -f ./fe/Dockerfile -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/catchme-game-fe:prod --build-arg REACT_APP_API_SERVICE_URL=$REACT_APP_API_SERVICE_URL ./fe
   post_build:
     commands:
       - echo "Pushing [prod] images to AWS ECR..."
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-db:prod
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-be:prod
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/twtr-fe:prod
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/catchme-game-fe:prod
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/catchme-game-be:prod
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/catchme-game-db:prod
