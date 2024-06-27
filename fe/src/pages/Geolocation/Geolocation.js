@@ -21,12 +21,17 @@ const styles = (theme) => ({
   },
 });
 
-const markerColors2 = {
+const markerColors = {
   // Cop is red marker
   'cop'  : rgbToHex('#ff0000'),
 
   // Mafia is green marker
   'mafia': rgbToHex('#000000') 
+};
+
+const markerColors2 = {
+  'cop':`rgb(255, 0, 0)`, // red
+  'mafia':`rgb(149, 188, 208)`  // blue
 };
 
 // Server address and port defined as env variables
